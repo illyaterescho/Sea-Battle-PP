@@ -1,4 +1,4 @@
-package org.tereshko;
+package org.SeaBattlePP;
 
 public class Main {
     public static void main(String[] args) {
