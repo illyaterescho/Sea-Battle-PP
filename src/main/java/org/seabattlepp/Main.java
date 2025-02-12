@@ -1,8 +1,0 @@
-package org.seabattlepp;
-
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("Sea Battle project is ready for development!");
-
-    }
-}
