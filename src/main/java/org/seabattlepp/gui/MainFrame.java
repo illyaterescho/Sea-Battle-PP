@@ -82,7 +82,7 @@ public class MainFrame extends JFrame {
     }
 
     // метод для створення ігрової дошки з кнопками
-    private JPanel createBoard(Color backgroundColor) {
+    public JPanel createBoard(Color backgroundColor) {
         JPanel panel = getPanel(backgroundColor); // створення панелі для дошки
 
         JPanel grid = getJPanel(backgroundColor); // створення клітинок для дошки
@@ -114,7 +114,7 @@ public class MainFrame extends JFrame {
     }
 
     // метод для створення панелі з заданим кольором фону
-    private static JPanel getPanel(Color backgroundColor) {
+    public static JPanel getPanel(Color backgroundColor) {
         JPanel panel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -130,7 +130,7 @@ public class MainFrame extends JFrame {
     }
 
     // метод для створення сітки з заданим кольором фону
-    private static JPanel getJPanel(Color backgroundColor) {
+    public static JPanel getJPanel(Color backgroundColor) {
         JPanel grid = new JPanel(new GridLayout(11, 11, 15, 15)) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -148,7 +148,7 @@ public class MainFrame extends JFrame {
     }
 
     // внутрішній клас для ShipPanel (панель з кораблями)
-    static class ShipPanelExample {
+    public static class ShipPanelExample {
         // статичний метод для створення панелі з кораблями
         public static JPanel createShipPanel() {
             JPanel shipPanel = new JPanel(new GridBagLayout()); // використання GridBagLayout для гнучкого розміщення
@@ -199,7 +199,7 @@ public class MainFrame extends JFrame {
 
             return shipPanel; // повернення готової панелі з кораблями
         }
-        private static JLabel getJLabel(int i, int j) {
+        public static JLabel getJLabel(int i, int j) {
             JLabel imageLabel = new JLabel(); // створення JLabel для зображення
             imageLabel.setPreferredSize(new Dimension(50, 50)); // встановлення розміру для зображення
 
@@ -238,7 +238,7 @@ public class MainFrame extends JFrame {
             return imageLabel;
         }
         // внутрішній клас для ShipButton (кнопка-клітинка корабля)
-        private static class ShipButton extends JButton {
+        public static class ShipButton extends JButton {
             public ShipButton() {
                 setPreferredSize(new Dimension(50, 50)); // розмір клітинки
                 setContentAreaFilled(false); // не заповнювати область контенту кнопки
@@ -274,9 +274,9 @@ public class MainFrame extends JFrame {
         }
     }
     // внутрішній клас для RoundedButton
-    static class RoundedButton extends JButton {
-        private final Color backgroundColor; // колір фону кнопки
-        private final Color hoverColor; // колір фону при наведенні курсора
+    public static class RoundedButton extends JButton {
+        public final Color backgroundColor; // колір фону кнопки
+        public final Color hoverColor; // колір фону при наведенні курсора
 
         // Конструктор класу
         public RoundedButton(String text, Color backgroundColor, Color hoverColor) {
@@ -309,7 +309,7 @@ public class MainFrame extends JFrame {
     }
 
     // метод для створення панелі з кнопками
-    private JPanel createButtonPanel() {
+    public JPanel createButtonPanel() {
         JPanel buttonPanel = new JPanel(new BorderLayout()); // створення панелі з макетом BorderLayout
         buttonPanel.setOpaque(false); // встановлення прозорості
 
@@ -341,11 +341,11 @@ public class MainFrame extends JFrame {
     }
 
     // внутрішній клас для RoundBorder (закруглена рамка)
-    static class RoundBorder extends AbstractBorder {
+    public static class RoundBorder extends AbstractBorder {
 
-        private final Color color; // колір рамки
-        private final int thickness; // товщина рамки
-        private final int arcRadius; // радіус закруглення
+        public final Color color; // колір рамки
+        public final int thickness; // товщина рамки
+        public final int arcRadius; // радіус закруглення
 
         // конструктор класу
         public RoundBorder(Color color, int thickness, int arcRadius) {
