@@ -14,12 +14,15 @@ import static org.seabattlepp.gui.MainFrame.ShipPanelExample.createShipPanel;
 
 public class MainFrame extends JFrame {
 
+
+
     // для запуску програми
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainFrame::new); // запуск програми Swing
     }
 
     public MainFrame() {
+
         // (налаштування вікна: заголовок, іконка, закриття)
         setTitle("Морський Бій");
         try {
@@ -36,34 +39,35 @@ public class MainFrame extends JFrame {
         contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
 
-        // створення панелі для дошок та встановлення прозорості
+        // ... (створення панелі для дошок та встановлення прозорості)
         JPanel boardPanel = new JPanel(new GridLayout(1, 2, 20, 20));
         boardPanel.setOpaque(false);
 
-        // (налаштування шрифту для написів)
+        // ... (налаштування шрифту для написів)
         Font labelFont = new Font("Inter", Font.BOLD, 35);
 
-        // (створення лівої дошки (гравця)
+        // ... (створення лівої дошки (гравця)
         JPanel leftBoard = new JPanel(new BorderLayout());
         leftBoard.setOpaque(false);
         JLabel leftLabel = new JLabel("Ваша Дошка", SwingConstants.CENTER);
         leftLabel.setFont(labelFont);
         leftBoard.add(leftLabel, BorderLayout.NORTH);
-        leftBoard.add(createBoard(new Color(0x699BF7)), BorderLayout.CENTER);
+        JPanel grid = leftBoard(new Color(0x699BF7)); // Створюємо та додаємо сітку на ліву дошку
+        leftBoard.add(grid, BorderLayout.CENTER);
 
-        // (створення правої дошки (комп'ютера)
+        // ... (створення правої дошки (комп'ютера)
         JPanel rightBoard = new JPanel(new BorderLayout());
         rightBoard.setOpaque(false);
         JLabel rightLabel = new JLabel("Комп'ютер", SwingConstants.CENTER);
         rightLabel.setFont(labelFont);
         rightBoard.add(rightLabel, BorderLayout.NORTH);
-        rightBoard.add(createBoard(new Color(0xFF8577)), BorderLayout.CENTER);
+        rightBoard.add(rightBoard(new Color(0xFF8577)), BorderLayout.CENTER);
 
         // ... (додавання дошок на панель)
         boardPanel.add(leftBoard);
         boardPanel.add(rightBoard);
 
-        // створення панелі з кораблями (знизу)
+        // ... (створення панелі з кораблями (знизу)
         JPanel shipPanel = createShipPanel();
         shipPanel.setOpaque(false);
 
@@ -82,7 +86,7 @@ public class MainFrame extends JFrame {
     }
 
     // метод для створення ігрової дошки з кнопками
-    public JPanel createBoard(Color backgroundColor) {
+    public JPanel rightBoard(Color backgroundColor) {
         JPanel panel = getPanel(backgroundColor); // створення панелі для дошки
 
         JPanel grid = getJPanel(backgroundColor); // створення клітинок для дошки
@@ -100,9 +104,9 @@ public class MainFrame extends JFrame {
                     letterLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
                     letterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
                     grid.add(letterLabel); // додавання напису
-                } else if (i > 0 && j > 0) {
+                } else if (i > 0) {
                     // додавання клітинок-кнопок для кораблів
-                    ShipPanelExample.ShipButton cell = new ShipPanelExample.ShipButton(); // створення кнопки
+                    MainFrame.ShipPanelExample.ShipButton cell = new MainFrame.ShipPanelExample.ShipButton(); // створення кнопки
                     grid.add(cell); // додавання клітинки
                 } else {
                     grid.add(new JLabel("")); // пусті клітинки
@@ -111,6 +115,35 @@ public class MainFrame extends JFrame {
         }
         panel.add(grid, BorderLayout.CENTER); // додавання клітинок на панель
         return panel; // повернення панелі з дошкою
+    }
+
+    // метод для створення сітки
+    public JPanel leftBoard(Color backgroundColor) {
+        JPanel grid = getJPanel(backgroundColor); // створення клітинок для дошки
+        for (int i = 0; i < 11; i++) {
+            for (int j = 0; j < 11; j++) {
+                if (i == 0 && j > 0) {
+                    // додавання номерів стовпців
+                    JLabel numLabel = new JLabel(String.valueOf(j), SwingConstants.CENTER); // створення напису з номером стовпця
+                    numLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
+                    numLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
+                    grid.add(numLabel); // додавання напису
+                } else if (j == 0 && i > 0) {
+                    // Додавання літер рядків
+                    JLabel letterLabel = new JLabel(String.valueOf((char) ('A' + i - 1)), SwingConstants.CENTER); // створення напису з літерою рядка
+                    letterLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
+                    letterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
+                    grid.add(letterLabel); // додавання напису
+                } else if (i > 0) {
+                    // додавання клітинок-кнопок для кораблів та збереження їх в масив
+                    ShipPanelExample.ShipButton cell = new ShipPanelExample.ShipButton(); // створення кнопки
+                    grid.add(cell); // додавання клітинки
+                } else {
+                    grid.add(new JLabel("")); // пусті клітинки
+                }
+            }
+        }
+        return grid;
     }
 
     // метод для створення панелі з заданим кольором фону
@@ -259,6 +292,7 @@ public class MainFrame extends JFrame {
                     }
                 });
             }
+
 
             // перемалювання компонента
             @Override
