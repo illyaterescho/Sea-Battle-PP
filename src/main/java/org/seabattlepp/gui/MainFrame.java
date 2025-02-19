@@ -85,7 +85,7 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    // метод для створення ігрової дошки з кнопками
+    // метод для створення ігрової дошки1
     public JPanel rightBoard(Color backgroundColor) {
         JPanel panel = getPanel(backgroundColor); // створення панелі для дошки
 
