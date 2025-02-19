@@ -34,19 +34,19 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(20, 20));
 
-        // ... (створення панелі вмісту та встановлення відступів)
+        // (створення панелі вмісту та встановлення відступів)
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
 
-        // ... (створення панелі для дошок та встановлення прозорості)
+        // (створення панелі для дошок та встановлення прозорості)
         JPanel boardPanel = new JPanel(new GridLayout(1, 2, 20, 20));
         boardPanel.setOpaque(false);
 
-        // ... (налаштування шрифту для написів)
+        // (налаштування шрифту для написів)
         Font labelFont = new Font("Inter", Font.BOLD, 35);
 
-        // ... (створення лівої дошки (гравця)
+        // (створення лівої дошки (гравця)
         JPanel leftBoard = new JPanel(new BorderLayout());
         leftBoard.setOpaque(false);
         JLabel leftLabel = new JLabel("Ваша Дошка", SwingConstants.CENTER);
@@ -55,7 +55,7 @@ public class MainFrame extends JFrame {
         JPanel grid = leftBoard(new Color(0x699BF7)); // Створюємо та додаємо сітку на ліву дошку
         leftBoard.add(grid, BorderLayout.CENTER);
 
-        // ... (створення правої дошки (комп'ютера)
+        // (створення правої дошки (комп'ютера)
         JPanel rightBoard = new JPanel(new BorderLayout());
         rightBoard.setOpaque(false);
         JLabel rightLabel = new JLabel("Комп'ютер", SwingConstants.CENTER);
@@ -63,15 +63,15 @@ public class MainFrame extends JFrame {
         rightBoard.add(rightLabel, BorderLayout.NORTH);
         rightBoard.add(rightBoard(new Color(0xFF8577)), BorderLayout.CENTER);
 
-        // ... (додавання дошок на панель)
+        // (додавання дошок на панель)
         boardPanel.add(leftBoard);
         boardPanel.add(rightBoard);
 
-        // ... (створення панелі з кораблями (знизу)
+        // (створення панелі з кораблями (знизу)
         JPanel shipPanel = createShipPanel();
         shipPanel.setOpaque(false);
 
-        // ... (створення панелі з кнопками (зверху))
+        // (створення панелі з кнопками (зверху))
         JPanel buttonPanel = createButtonPanel();
 
         // додавання компонентів на головне вікно
@@ -117,7 +117,7 @@ public class MainFrame extends JFrame {
         return panel; // повернення панелі з дошкою
     }
 
-    // метод для створення сітки
+    // метод для створення дошки2
     public JPanel leftBoard(Color backgroundColor) {
         JPanel grid = getJPanel(backgroundColor); // створення клітинок для дошки
         for (int i = 0; i < 11; i++) {
