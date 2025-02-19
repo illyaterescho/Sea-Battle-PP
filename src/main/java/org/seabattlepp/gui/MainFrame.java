@@ -89,7 +89,7 @@ public class MainFrame extends JFrame {
     public JPanel rightBoard(Color backgroundColor) {
         JPanel panel = getPanel(backgroundColor); // створення панелі для дошки
 
-        JPanel grid = getJPanel(backgroundColor); // створення клітинок для дошки
+        JPanel grid1 = getJPanel(backgroundColor); // створення клітинок для дошки
         for (int i = 0; i < 11; i++) {
             for (int j = 0; j < 11; j++) {
                 if (i == 0 && j > 0) {
@@ -97,29 +97,29 @@ public class MainFrame extends JFrame {
                     JLabel numLabel = new JLabel(String.valueOf(j), SwingConstants.CENTER); // створення напису з номером стовпця
                     numLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
                     numLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
-                    grid.add(numLabel); // додавання напису
+                    grid1.add(numLabel); // додавання напису
                 } else if (j == 0 && i > 0) {
                     // Додавання літер рядків
                     JLabel letterLabel = new JLabel(String.valueOf((char) ('A' + i - 1)), SwingConstants.CENTER); // створення напису з літерою рядка
                     letterLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
                     letterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
-                    grid.add(letterLabel); // додавання напису
+                    grid1.add(letterLabel); // додавання напису
                 } else if (i > 0) {
                     // додавання клітинок-кнопок для кораблів
                     MainFrame.ShipPanelExample.ShipButton cell = new MainFrame.ShipPanelExample.ShipButton(); // створення кнопки
-                    grid.add(cell); // додавання клітинки
+                    grid1.add(cell); // додавання клітинки
                 } else {
-                    grid.add(new JLabel("")); // пусті клітинки
+                    grid1.add(new JLabel("")); // пусті клітинки
                 }
             }
         }
-        panel.add(grid, BorderLayout.CENTER); // додавання клітинок на панель
+        panel.add(grid1, BorderLayout.CENTER); // додавання клітинок на панель
         return panel; // повернення панелі з дошкою
     }
 
     // метод для створення дошки2
     public JPanel leftBoard(Color backgroundColor) {
-        JPanel grid = getJPanel(backgroundColor); // створення клітинок для дошки
+        JPanel grid2 = getJPanel(backgroundColor); // створення клітинок для дошки
         for (int i = 0; i < 11; i++) {
             for (int j = 0; j < 11; j++) {
                 if (i == 0 && j > 0) {
@@ -127,23 +127,23 @@ public class MainFrame extends JFrame {
                     JLabel numLabel = new JLabel(String.valueOf(j), SwingConstants.CENTER); // створення напису з номером стовпця
                     numLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
                     numLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
-                    grid.add(numLabel); // додавання напису
+                    grid2.add(numLabel); // додавання напису
                 } else if (j == 0 && i > 0) {
                     // Додавання літер рядків
                     JLabel letterLabel = new JLabel(String.valueOf((char) ('A' + i - 1)), SwingConstants.CENTER); // створення напису з літерою рядка
                     letterLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
                     letterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
-                    grid.add(letterLabel); // додавання напису
+                    grid2.add(letterLabel); // додавання напису
                 } else if (i > 0) {
                     // додавання клітинок-кнопок для кораблів та збереження їх в масив
                     ShipPanelExample.ShipButton cell = new ShipPanelExample.ShipButton(); // створення кнопки
-                    grid.add(cell); // додавання клітинки
+                    grid2.add(cell); // додавання клітинки
                 } else {
-                    grid.add(new JLabel("")); // пусті клітинки
+                    grid2.add(new JLabel("")); // пусті клітинки
                 }
             }
         }
-        return grid;
+        return grid2;
     }
 
     // метод для створення панелі з заданим кольором фону
