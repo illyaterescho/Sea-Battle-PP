@@ -13,9 +13,6 @@ import javax.swing.border.TitledBorder;
 import static org.seabattlepp.gui.MainFrame.ShipPanelExample.createShipPanel;
 
 public class MainFrame extends JFrame {
-
-
-
     // для запуску програми
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainFrame::new); // запуск програми Swing
