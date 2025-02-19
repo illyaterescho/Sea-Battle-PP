@@ -1,5 +1,6 @@
 package org.seabattlepp.gui;
 
+Illia-Tereshko
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -410,4 +411,4 @@ public class MainFrame extends JFrame {
         }
 
     }
-}
+
