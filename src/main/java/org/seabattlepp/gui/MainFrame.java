@@ -244,6 +244,7 @@ public class MainFrame extends JFrame {
                     }
                     playerShipButtons[row][col].setText(null);
                     playerShipButtons[row][col].setEnabled(false);
+                    playerShipButtons[row][col].setBackground(Color.GRAY);
                 }
             }
         }
@@ -399,18 +400,6 @@ public class MainFrame extends JFrame {
                 setOpaque(false);
                 setBackground(Color.WHITE);
                 setBorder(new RoundBorder(Color.BLACK, 4, 45));
-
-                addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseEntered(MouseEvent evt) {
-                        setBackground(Color.GRAY);
-                    }
-
-                    @Override
-                    public void mouseExited(MouseEvent evt) {
-                        setBackground(Color.WHITE);
-                    }
-                });
             }
 
             @Override
