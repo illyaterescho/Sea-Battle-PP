@@ -1,6 +1,5 @@
 package org.seabattlepp.gui;
 
-Illia-Tereshko
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -9,15 +8,18 @@ import javax.swing.border.AbstractBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import java.util.List;
+import org.seabattlepp.ships.Ship;
+import org.seabattlepp.ships.ShipPlacer;
+import org.seabattlepp.ships.ShipValidator;
 
-// імпорт для використання статичного методу createShipPanel
 import static org.seabattlepp.gui.MainFrame.ShipPanelExample.createShipPanel;
 
+
 public class MainFrame extends JFrame {
-    // для запуску програми
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(MainFrame::new); // запуск програми Swing
-    }
+
+    private final ShipPanelExample.ShipButton[][] playerShipButtons = new ShipPanelExample.ShipButton[11][11]; // Зберігаємо кнопки лівої дошки
+    private RoundedButton randomButton;
 
     public MainFrame() {
 
@@ -45,13 +47,14 @@ public class MainFrame extends JFrame {
         Font labelFont = new Font("Inter", Font.BOLD, 35);
 
         // (створення лівої дошки (гравця)
-        JPanel leftBoard = new JPanel(new BorderLayout());
-        leftBoard.setOpaque(false);
+        JPanel leftBoardPanel = new JPanel(new BorderLayout()); // Панель для лівої дошки
+        leftBoardPanel.setOpaque(false);
         JLabel leftLabel = new JLabel("Ваша Дошка", SwingConstants.CENTER);
         leftLabel.setFont(labelFont);
-        leftBoard.add(leftLabel, BorderLayout.NORTH);
+        leftBoardPanel.add(leftLabel, BorderLayout.NORTH);
         JPanel grid = leftBoard(new Color(0x699BF7)); // Створюємо та додаємо сітку на ліву дошку
-        leftBoard.add(grid, BorderLayout.CENTER);
+        leftBoardPanel.add(grid, BorderLayout.CENTER);
+
 
         // (створення правої дошки (комп'ютера)
         JPanel rightBoard = new JPanel(new BorderLayout());
@@ -62,7 +65,7 @@ public class MainFrame extends JFrame {
         rightBoard.add(rightBoard(new Color(0xFF8577)), BorderLayout.CENTER);
 
         // (додавання дошок на панель)
-        boardPanel.add(leftBoard);
+        boardPanel.add(leftBoardPanel);
         boardPanel.add(rightBoard);
 
         // (створення панелі з кораблями (знизу)
@@ -71,6 +74,20 @@ public class MainFrame extends JFrame {
 
         // (створення панелі з кнопками (зверху))
         JPanel buttonPanel = createButtonPanel();
+
+        // Отримання кнопки "Рандом" з shipPanel
+        Component[] components = shipPanel.getComponents();
+        for (Component comp : components) {
+            if (comp instanceof RoundedButton && ((RoundedButton) comp).getText().equals("Рандом")) {
+                randomButton = (RoundedButton) comp;
+                break;
+            }
+        }
+
+        // Додавання ActionListener до кнопки "Рандом"
+        if (randomButton != null) {
+            randomButton.addActionListener(_ -> placeShipsRandomlyOnLeftBoard());
+        }
 
         // додавання компонентів на головне вікно
         add(boardPanel, BorderLayout.CENTER);
@@ -83,81 +100,188 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    // метод для створення ігрової дошки1
+    // метод для створення ігрової дошки1 (права дошка - Комп'ютер)
     public JPanel rightBoard(Color backgroundColor) {
-        JPanel panel = getPanel(backgroundColor); // створення панелі для дошки
+        JPanel panel = getPanel(backgroundColor);
 
-        JPanel grid1 = getJPanel(backgroundColor); // створення клітинок для дошки
+        JPanel grid1 = getJPanel(backgroundColor);
         for (int i = 0; i < 11; i++) {
             for (int j = 0; j < 11; j++) {
                 if (i == 0 && j > 0) {
-                    // додавання номерів стовпців
-                    JLabel numLabel = new JLabel(String.valueOf(j), SwingConstants.CENTER); // створення напису з номером стовпця
-                    numLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
-                    numLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
-                    grid1.add(numLabel); // додавання напису
+                    JLabel numLabel = new JLabel(String.valueOf(j), SwingConstants.CENTER);
+                    numLabel.setFont(new Font("Inter", Font.BOLD, 25));
+                    numLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+                    grid1.add(numLabel);
                 } else if (j == 0 && i > 0) {
-                    // Додавання літер рядків
-                    JLabel letterLabel = new JLabel(String.valueOf((char) ('A' + i - 1)), SwingConstants.CENTER); // створення напису з літерою рядка
-                    letterLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
-                    letterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
-                    grid1.add(letterLabel); // додавання напису
+                    JLabel letterLabel = new JLabel(String.valueOf((char) ('A' + i - 1)), SwingConstants.CENTER);
+                    letterLabel.setFont(new Font("Inter", Font.BOLD, 25));
+                    letterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+                    grid1.add(letterLabel);
                 } else if (i > 0) {
-                    // додавання клітинок-кнопок для кораблів
-                    MainFrame.ShipPanelExample.ShipButton cell = new MainFrame.ShipPanelExample.ShipButton(); // створення кнопки
-                    grid1.add(cell); // додавання клітинки
+                    MainFrame.ShipPanelExample.ShipButton cell = new MainFrame.ShipPanelExample.ShipButton();
+                    grid1.add(cell);
                 } else {
-                    grid1.add(new JLabel("")); // пусті клітинки
+                    grid1.add(new JLabel(""));
                 }
             }
         }
-        panel.add(grid1, BorderLayout.CENTER); // додавання клітинок на панель
-        return panel; // повернення панелі з дошкою
+        panel.add(grid1, BorderLayout.CENTER);
+        return panel;
     }
 
-    // метод для створення дошки2
+    //для створення дошки2 (ліва дошка - гравець)
     public JPanel leftBoard(Color backgroundColor) {
-        JPanel grid2 = getJPanel(backgroundColor); // створення клітинок для дошки
+        JPanel grid2 = getJPanel(backgroundColor);
+
         for (int i = 0; i < 11; i++) {
             for (int j = 0; j < 11; j++) {
                 if (i == 0 && j > 0) {
-                    // додавання номерів стовпців
-                    JLabel numLabel = new JLabel(String.valueOf(j), SwingConstants.CENTER); // створення напису з номером стовпця
-                    numLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
-                    numLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
-                    grid2.add(numLabel); // додавання напису
+                    JLabel numLabel = new JLabel(String.valueOf(j), SwingConstants.CENTER);
+                    numLabel.setFont(new Font("Inter", Font.BOLD, 25));
+                    numLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+                    grid2.add(numLabel);
                 } else if (j == 0 && i > 0) {
-                    // Додавання літер рядків
-                    JLabel letterLabel = new JLabel(String.valueOf((char) ('A' + i - 1)), SwingConstants.CENTER); // створення напису з літерою рядка
-                    letterLabel.setFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту
-                    letterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0)); // видалення стандартної рамки
-                    grid2.add(letterLabel); // додавання напису
+                    JLabel letterLabel = new JLabel(String.valueOf((char) ('A' + i - 1)), SwingConstants.CENTER);
+                    letterLabel.setFont(new Font("Inter", Font.BOLD, 25));
+                    letterLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+                    grid2.add(letterLabel);
                 } else if (i > 0) {
-                    // додавання клітинок-кнопок для кораблів та збереження їх в масив
-                    ShipPanelExample.ShipButton cell = new ShipPanelExample.ShipButton(); // створення кнопки
-                    grid2.add(cell); // додавання клітинки
+                    ShipPanelExample.ShipButton cell = new ShipPanelExample.ShipButton();
+                    playerShipButtons[i][j] = cell; // зберігаєм кнопку в масиві playerShipButtons
+                    grid2.add(cell);
                 } else {
-                    grid2.add(new JLabel("")); // пусті клітинки
+                    grid2.add(new JLabel(""));
                 }
             }
         }
         return grid2;
     }
 
+
+    // для рандомного розміщення кораблів на лівій дошці
+    public void placeShipsRandomlyOnLeftBoard() {
+        ShipValidator validator = new ShipValidator();
+        ShipPlacer placer = new ShipPlacer(validator);
+        List<Ship> placedShips = placer.placeShipsRandomly();
+        ImageIcon pochatokKorIcon = null;
+        ImageIcon centerKorIcon = null;
+        ImageIcon kinecKorIcon = null;
+        ImageIcon centerKorVertIcon = null;
+        ImageIcon headIcon = null;
+        ImageIcon botKorVertIcon = null;
+
+
+        try {
+            pochatokKorIcon = new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png");
+            centerKorIcon = new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png");
+            kinecKorIcon = new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png");
+            centerKorVertIcon = new ImageIcon("src/main/java/org/seabattlepp/img/centerKorVert.png");
+            headIcon = new ImageIcon("src/main/java/org/seabattlepp/img/head.png");
+            botKorVertIcon = new ImageIcon("src/main/java/org/seabattlepp/img/botKorVert.png");
+
+
+        } catch (Exception e) {
+            System.err.println("Помилка завантаження зображень кораблів: " + e.getMessage());
+        }
+
+        // видалення попереднього розміщення
+        clearLeftBoardShips();
+
+        for (Ship ship : placedShips) {
+            List<int[]> coordinates = ship.getCoordinates();
+            int shipLength = ship.getLength();
+            boolean isVertical = false;
+            if (shipLength > 1) {
+                if (coordinates.get(0)[1] == coordinates.get(1)[1]) {
+                    isVertical = true;
+                }
+            }
+
+            for (int i = 0; i < shipLength; i++) {
+                int[] coord = coordinates.get(i);
+                int row = coord[0];
+                int col = coord[1];
+                if (playerShipButtons[row][col] != null) {
+                    ImageIcon currentIcon = null;
+                    // розміри кнопки для масштабування зображення
+                    int buttonWidth = playerShipButtons[row][col].getWidth();
+                    int buttonHeight = playerShipButtons[row][col].getHeight();
+
+                    // перевірка чи розміри підходять
+                    if (buttonWidth <= 0 || buttonHeight <= 0) {
+                        buttonWidth = 50; // розмір по дефолту
+                        buttonHeight = 50;
+                    }
+
+
+                    if (shipLength == 1) {
+                        currentIcon = headIcon;
+                    } else if (i == 0) {
+                        if (isVertical) {
+                            currentIcon = headIcon;
+                        } else {
+                            currentIcon = pochatokKorIcon;
+                        }
+                    } else if (i == shipLength - 1) {
+                        if (isVertical) {
+                            currentIcon = botKorVertIcon;
+                        } else {
+                            currentIcon = kinecKorIcon;
+                        }
+                    } else {
+                        if (isVertical) {
+                            currentIcon = centerKorVertIcon;
+                        } else {
+                            currentIcon = centerKorIcon;
+                        }
+                    }
+
+                    if (currentIcon != null) {
+                        // масштабування іконки до розміру кнопки
+                        Image scaledImage = currentIcon.getImage().getScaledInstance(buttonWidth, buttonHeight,  Image.SCALE_SMOOTH);
+                        currentIcon = new ImageIcon(scaledImage);
+                        playerShipButtons[row][col].setIcon(currentIcon);
+                    }
+                    playerShipButtons[row][col].setText(null);
+                    playerShipButtons[row][col].setEnabled(false);
+                }
+            }
+        }
+    }
+
+    // для очищення відображення кораблів на лівій дошці
+    private void clearLeftBoardShips() {
+        try  {
+        } catch (Exception e) {
+            System.err.println("Помилка завантаження зображення води: " + e.getMessage());
+        }
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                if (playerShipButtons[i][j] != null) {
+                    playerShipButtons[i][j].setIcon(null);
+                    playerShipButtons[i][j].setText("");
+                    playerShipButtons[i][j].setBackground(Color.WHITE); // повертаю білий фон
+                    playerShipButtons[i][j].setEnabled(true); // клітинки знову ектів)
+                }
+            }
+        }
+    }
+
+
     // метод для створення панелі з заданим кольором фону
     public static JPanel getPanel(Color backgroundColor) {
         JPanel panel = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g); // виклик батьківського методу для малювання фону
-                Graphics2D g2d = (Graphics2D) g; // створення об'єкта Graphics2D для малювання
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // включення згладжування
-                g2d.setColor(backgroundColor); // встановлення кольору фону
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 220, 200); // малювання закругленого прямокутника
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(backgroundColor);
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 220, 200);
             }
         };
-        panel.setOpaque(true); // встановлення непрозорості панелі
-        return panel; // повернення панелі
+        panel.setOpaque(true);
+        return panel;
     }
 
     // метод для створення сітки з заданим кольором фону
@@ -165,119 +289,117 @@ public class MainFrame extends JFrame {
         JPanel grid = new JPanel(new GridLayout(11, 11, 15, 15)) {
             @Override
             protected void paintComponent(Graphics g) {
-                super.paintComponent(g); // виклик батьківського методу для малювання фону
-                Graphics2D g2d = (Graphics2D) g; // створення об'єкта Graphics2D для малювання
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // включення згладжування
-                g2d.setColor(backgroundColor); // встановлення кольору фону
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 200, 200); // малювання закругленого прямокутника
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(backgroundColor);
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 200, 200);
                 g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 200, 200);
             }
         };
-        grid.setBorder(new CompoundBorder(new RoundBorder(Color.BLACK, 3, 200), new EmptyBorder(5, 5, 80, 50))); // встановлення рамки для сітки
-        grid.setOpaque(false); // встановлення прозорості сітки
-        return grid; // повернення сітки
+        grid.setBorder(new CompoundBorder(new RoundBorder(Color.BLACK, 3, 200), new EmptyBorder(5, 5, 80, 50)));
+        grid.setOpaque(false);
+        return grid;
     }
 
     // внутрішній клас для ShipPanel (панель з кораблями)
     public static class ShipPanelExample {
         // статичний метод для створення панелі з кораблями
         public static JPanel createShipPanel() {
-            JPanel shipPanel = new JPanel(new GridBagLayout()); // використання GridBagLayout для гнучкого розміщення
-            TitledBorder border = BorderFactory.createTitledBorder("Корабельна шпаргалка"); // створення заголовка для панелі
-            border.setTitleFont(new Font("Inter", Font.BOLD, 25)); // встановлення шрифту для заголовка
-            border.setTitleColor(Color.BLACK); // Встановлення кольору для заголовка
-            border.setBorder(new RoundBorder(Color.BLACK, 3, 40)); // встановлення закругленої рамки для заголовка
-            shipPanel.setBorder(border); // встановлення заголовка для панелі
-            shipPanel.setOpaque(false); // встановлення прозорості для панелі
+            JPanel shipPanel = new JPanel(new GridBagLayout());
+            TitledBorder border = BorderFactory.createTitledBorder("Корабельна шпаргалка");
+            border.setTitleFont(new Font("Inter", Font.BOLD, 25));
+            border.setTitleColor(Color.BLACK);
+            border.setBorder(new RoundBorder(Color.BLACK, 3, 40));
+            shipPanel.setBorder(border);
+            shipPanel.setOpaque(false);
 
-            String[] ships = {"Авіаносець", "Броненосець", "Крейсер", "Руйнівник", "Фрегат"}; // масив з назвами кораблів
-            int[] shipImageCounts = {5, 4, 3, 2, 2}; // масив з кількістю зображень для кожного корабля
+            String[] ships = {"Авіаносець", "Броненосець", "Крейсер", "Руйнівник"};
+            int[] shipImageCounts = {5, 4, 3, 2, 2};
 
-            GridBagConstraints gbc = new GridBagConstraints(); // створення об'єкта GridBagConstraints для налаштування розміщення компонентів
-            gbc.insets = new Insets(20, 20, 20, 20); // встановлення відступів між компонентами
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(20, 20, 20, 20);
             JButton randomButton = new RoundedButton("Рандом", new Color(0xD0D0D0), new Color(0x787878));
             randomButton.setPreferredSize(new Dimension(150, 55));
             GridBagConstraints gbc2 = new GridBagConstraints();
             gbc2.insets = new Insets(37, 20, 20, 20);
             gbc2.gridx = 35;
             gbc2.gridy = 0;
-            shipPanel.add(randomButton, gbc2); // заміна gbc на gbc2
+            shipPanel.add(randomButton, gbc2);
 
             for (int i = 0; i < ships.length; i++) {
-                JPanel shipContainer = new JPanel(); // створення панелі для кожного корабля
-                shipContainer.setLayout(new BoxLayout(shipContainer, BoxLayout.Y_AXIS)); // встановлення вертикального розміщення для компонентів
-                shipContainer.setOpaque(false); // Встановлення прозорості для панелі
+                JPanel shipContainer = new JPanel();
+                shipContainer.setLayout(new BoxLayout(shipContainer, BoxLayout.Y_AXIS));
+                shipContainer.setOpaque(false);
 
-                JLabel shipLabel = new JLabel(ships[i]); // створення напису з назвою корабля
-                shipLabel.setFont(new Font("Inter", Font.BOLD, 23)); // встановлення шрифту для напису
-                shipLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // вирівнювання напису по центру
-                shipContainer.add(shipLabel); // додавання напису на панель корабля
+                JLabel shipLabel = new JLabel(ships[i]);
+                shipLabel.setFont(new Font("Inter", Font.BOLD, 23));
+                shipLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                shipContainer.add(shipLabel);
 
-                JPanel imagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 2, 2)); // створення панелі для зображень корабля
-                imagePanel.setOpaque(false); // встановлення прозорості для панелі
+                JPanel imagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 2, 2));
+                imagePanel.setOpaque(false);
 
                 for (int j = 0; j < shipImageCounts[i]; j++) {
                     JLabel imageLabel = getJLabel(i, j);
-                    imagePanel.add(imageLabel); // додавання зображення на панель
+                    imagePanel.add(imageLabel);
                 }
 
-                shipContainer.add(imagePanel); // додавання панелі зображень на панель корабля
+                shipContainer.add(imagePanel);
 
-                gbc.gridx = i + 1; // встановлення позиції корабля в сітці
+                gbc.gridx = i + 1;
                 gbc.gridy = 0;
-                shipPanel.add(shipContainer, gbc); // додавання панелі корабля на головну панель
+                shipPanel.add(shipContainer, gbc);
             }
 
-            return shipPanel; // повернення готової панелі з кораблями
+            return shipPanel;
         }
-        public static JLabel getJLabel(int i, int j) {
-            JLabel imageLabel = new JLabel(); // створення JLabel для зображення
-            imageLabel.setPreferredSize(new Dimension(50, 50)); // встановлення розміру для зображення
 
-            // встановлення зображень для кожного корабля та його частини
+        public static JLabel getJLabel(int i, int j) {
+            JLabel imageLabel = new JLabel();
+            imageLabel.setPreferredSize(new Dimension(50, 50));
+
             if (i == 0 && j == 0) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png")); // Авіаносець - початок
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png"));
             } else if (i == 0 && j == 1) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png")); // Авіаносець - середина
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
             } else if (i == 0 && j == 2) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png")); // Авіаносець - середина
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
             } else if (i == 0 && j == 3) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png")); // Авіаносець - середина
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
             } else if (i == 0) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png")); // Авіаносець - кінець
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png"));
             } else if (i == 1 && j == 0) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png")); // Броненосець - початок
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png"));
             } else if (i == 1 && j == 1) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png")); // Броненосець - середина
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
             } else if (i == 1 && j == 2) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png")); // Броненосець - середина
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
             } else if (i == 1) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png")); // Броненосець - кінець
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png"));
             } else if (i == 2 && j == 0) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png")); // Крейсер - початок
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png"));
             } else if (i == 2 && j == 1) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png")); // Крейсер - середина
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
             } else if (i == 2 && j == 2) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png")); // Крейсер - кінець
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png"));
             } else if (i == 3 && j == 0) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png")); // Руйнівник - початок
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png"));
             } else if (i == 3 && j == 1) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png")); // Руйнівник - кінець
-            } else if (i == 4 && j == 0) {
-                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/head.png")); // Фрегат - початок
+                imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png"));
             }
             return imageLabel;
         }
+
         // внутрішній клас для ShipButton (кнопка-клітинка корабля)
         public static class ShipButton extends JButton {
             public ShipButton() {
-                setPreferredSize(new Dimension(50, 50)); // розмір клітинки
-                setContentAreaFilled(false); // не заповнювати область контенту кнопки
-                setOpaque(false); // прозора кнопка
-                setBackground(Color.WHITE); // білий фон
-                setBorder(new RoundBorder(Color.BLACK, 4, 45)); // закруглена рамка
+                setPreferredSize(new Dimension(50, 50));
+                setContentAreaFilled(false);
+                setOpaque(false);
+                setBackground(Color.WHITE);
+                setBorder(new RoundBorder(Color.BLACK, 4, 45));
 
-                // Додаємо слухача миші для зміни кольору фону при наведенні
                 addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseEntered(MouseEvent evt) {
@@ -291,124 +413,119 @@ public class MainFrame extends JFrame {
                 });
             }
 
-
-            // перемалювання компонента
             @Override
             protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g.create(); // створення копії графіки
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);g2d.setColor(getBackground()); // встановлення кольору фону
-                g2d.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 45, 45); // заповнення закругленого прямокутника
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(getBackground());
+                g2d.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 45, 45);
 
-                super.paintComponent(g); // виклик батьківського методу для відображення інших компонентів
+                super.paintComponent(g);
 
-                g2d.dispose(); // звільнення ресурсів графіки
+                g2d.dispose();
             }
         }
     }
+
     // внутрішній клас для RoundedButton
     public static class RoundedButton extends JButton {
-        public final Color backgroundColor; // колір фону кнопки
-        public final Color hoverColor; // колір фону при наведенні курсора
+        public final Color backgroundColor;
+        public final Color hoverColor;
 
-        // Конструктор класу
         public RoundedButton(String text, Color backgroundColor, Color hoverColor) {
-            super(text); // виклик конструктора батьківського класу
-            this.backgroundColor = backgroundColor; // встановлення кольору фону
-            this.hoverColor = hoverColor; // встановлення кольору при наведенні курсора
-            setContentAreaFilled(false); // вимкнення заповнення області контенту кнопки
-            setFocusPainted(false); // вимкнення малювання фокуса
-            setBorderPainted(false); // вимкнення малювання рамки
-            setFont(new Font("Inter", Font.BOLD, 20)); // встановлення шрифту для напису
+            super(text);
+            this.backgroundColor = backgroundColor;
+            this.hoverColor = hoverColor;
+            setContentAreaFilled(false);
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setFont(new Font("Inter", Font.BOLD, 20));
         }
 
-        // перемалювання компонента
         @Override
         protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create(); // створюємо копію графіки
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // включаємо згладжування
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            g2.setColor(getModel().isRollover() ? hoverColor : backgroundColor); // встановлюємо колір фону залежно від стану кнопки
-            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30); // малюємо закруглений прямокутник
+            g2.setColor(getModel().isRollover() ? hoverColor : backgroundColor);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
 
-            g2.setColor(Color.BLACK); // встановлюємо колір рамки
-            g2.setStroke(new BasicStroke(2)); // встановлюємо товщину рамки
-            g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 30, 30); // малюємо рамку
+            g2.setColor(Color.BLACK);
+            g2.setStroke(new BasicStroke(2));
+            g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 30, 30);
 
-            g2.dispose(); // звільняємо ресурси графіки
+            g2.dispose();
 
-            super.paintComponent(g); // викликаємо батьківський метод для відображення інших компонентів
+            super.paintComponent(g);
         }
     }
 
     // метод для створення панелі з кнопками
     public JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new BorderLayout()); // створення панелі з макетом BorderLayout
-        buttonPanel.setOpaque(false); // встановлення прозорості
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.setOpaque(false);
 
-        JPanel startPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // створення панелі для кнопки "Почати гру" з макетом FlowLayout
-        JPanel resetPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 100, 0)); // створення панелі для кнопки "Скинути" з макетом FlowLayout
-        JPanel exitPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 100, 0)); // створення панелі для кнопки "Вийти" з макетом FlowLayout
+        JPanel startPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel resetPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 100, 0));
+        JPanel exitPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 100, 0));
 
-        startPanel.setOpaque(false); // встановлення прозорості для панелей
+        startPanel.setOpaque(false);
         resetPanel.setOpaque(false);
         exitPanel.setOpaque(false);
 
-        JButton startButton = new RoundedButton("Почати Гру", new Color(0x33CC66), new Color(0x388E3C)); // створення кнопки "Почати гру"
-        JButton resetButton = new RoundedButton("Скинути", new Color(0x699BF7), new Color(0x3366CC)); // створення кнопки "Скинути"
-        JButton exitButton = new RoundedButton("Вийти", new Color(0xFF8577), new Color(0xD32F2F)); // створення кнопки "Вийти"
+        JButton startButton = new RoundedButton("Почати Гру", new Color(0x33CC66), new Color(0x388E3C));
+        JButton resetButton = new RoundedButton("Скинути", new Color(0x699BF7), new Color(0x3366CC));
+        JButton exitButton = new RoundedButton("Вийти", new Color(0xFF8577), new Color(0xD32F2F));
 
-        startButton.setPreferredSize(new Dimension(750, 55)); // встановлення розміру для кнопок
+        startButton.setPreferredSize(new Dimension(750, 55));
         resetButton.setPreferredSize(new Dimension(200, 55));
         exitButton.setPreferredSize(new Dimension(200, 55));
 
-        startPanel.add(startButton); // додавання кнопок на панелі
+        startPanel.add(startButton);
         resetPanel.add(resetButton);
         exitPanel.add(exitButton);
 
-        buttonPanel.add(startPanel, BorderLayout.CENTER); // розміщення панелей на головній панелі
+        buttonPanel.add(startPanel, BorderLayout.CENTER);
         buttonPanel.add(resetPanel, BorderLayout.WEST);
         buttonPanel.add(exitPanel, BorderLayout.EAST);
 
-        return buttonPanel; // повернення панелі з кнопками
+        return buttonPanel;
     }
 
     // внутрішній клас для RoundBorder (закруглена рамка)
     public static class RoundBorder extends AbstractBorder {
 
-        public final Color color; // колір рамки
-        public final int thickness; // товщина рамки
-        public final int arcRadius; // радіус закруглення
+        public final Color color;
+        public final int thickness;
+        public final int arcRadius;
 
-        // конструктор класу
         public RoundBorder(Color color, int thickness, int arcRadius) {
             this.color = color;
             this.thickness = thickness;
             this.arcRadius = arcRadius;
         }
 
-        // метод для малювання рамки
         @Override
         public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-            Graphics2D g2d = (Graphics2D) g.create(); // створення копії графіки
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // згладжування
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            int adjustedX = x + thickness / 2; // коригування координат для врахування товщини рамки
+            int adjustedX = x + thickness / 2;
             int adjustedY = y + thickness / 2;
             int adjustedWidth = width - thickness;
             int adjustedHeight = height - thickness;
 
-            g2d.setColor(color); // встановлення кольору рамки
-            g2d.setStroke(new BasicStroke(thickness)); // встановлення товщини рамки
-            g2d.drawRoundRect(adjustedX, adjustedY, adjustedWidth, adjustedHeight, arcRadius, arcRadius); // малювання закругленого прямокутника
+            g2d.setColor(color);
+            g2d.setStroke(new BasicStroke(thickness));
+            g2d.drawRoundRect(adjustedX, adjustedY, adjustedWidth, adjustedHeight, arcRadius, arcRadius);
 
-            g2d.dispose(); // звільнення ресурсів графіки
+            g2d.dispose();
         }
 
-        // метод для отримання відступів рамки
         @Override
         public Insets getBorderInsets(Component c) {
-            return new Insets(thickness, thickness, thickness, thickness); // повернення відступів з усіх боків
+            return new Insets(thickness, thickness, thickness, thickness);
         }
 
     }
-
+}
