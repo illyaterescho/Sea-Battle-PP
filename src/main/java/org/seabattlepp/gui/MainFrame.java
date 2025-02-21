@@ -45,12 +45,6 @@ public class MainFrame extends JFrame {
                 break;
             }
         }
-
-        // додавання ActionListener до кнопки "Рандом"
-        if (randomButton != null) {
-            randomButton.addActionListener(e -> boardPanel.placeShipsRandomlyOnLeftBoard()); // виклик методу через boardPanel
-        }
-
         // додавання компонентів на головне вікно
         add(boardPanel, BorderLayout.CENTER);
         add(shipPanel, BorderLayout.SOUTH);

@@ -22,3 +22,4 @@ public class ShipButton extends JButton {
         g2d.dispose();
     }
 }
+//

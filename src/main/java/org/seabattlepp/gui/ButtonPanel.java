@@ -31,3 +31,4 @@ public class ButtonPanel extends JPanel {
         add(exitPanel, BorderLayout.EAST);
     }
 }
+//
