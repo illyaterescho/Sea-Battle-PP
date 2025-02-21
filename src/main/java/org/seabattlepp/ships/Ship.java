@@ -1,6 +1,8 @@
 package org.seabattlepp.ships;
 
 import java.util.List;
+import org.seabattlepp.gui.MainFrame;
+import org.seabattlepp.ships.Ship;
 
 public class Ship {
     private String type;
