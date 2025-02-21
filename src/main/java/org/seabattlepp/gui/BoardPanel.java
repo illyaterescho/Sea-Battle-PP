@@ -5,9 +5,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
-import org.seabattlepp.ships.Ship;
-import org.seabattlepp.ships.ShipPlacer;
-import org.seabattlepp.ships.ShipValidator;
 
 public class BoardPanel extends JPanel {
 
@@ -98,113 +95,6 @@ public class BoardPanel extends JPanel {
         }
         return grid2;
     }
-
-    // для рандомного розміщення кораблів на лівій дошці (перенесено з MainFrame та адаптовано)
-    public void placeShipsRandomlyOnLeftBoard() {
-        ShipValidator validator = new ShipValidator();
-        ShipPlacer placer = new ShipPlacer(validator);
-        List<Ship> placedShips = placer.placeShipsRandomly();
-        ImageIcon pochatokKorIcon = null;
-        ImageIcon centerKorIcon = null;
-        ImageIcon kinecKorIcon = null;
-        ImageIcon centerKorVertIcon = null;
-        ImageIcon headIcon = null;
-        ImageIcon botKorVertIcon = null;
-        try {
-            pochatokKorIcon = new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png");
-            centerKorIcon = new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png");
-            kinecKorIcon = new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png");
-            centerKorVertIcon = new ImageIcon("src/main/java/org/seabattlepp/img/centerKorVert.png");
-            headIcon = new ImageIcon("src/main/java/org/seabattlepp/img/head.png");
-            botKorVertIcon = new ImageIcon("src/main/java/org/seabattlepp/img/botKorVert.png");
-        } catch (Exception e) {
-            System.err.println("Помилка завантаження зображень кораблів: " + e.getMessage());
-        }
-
-        // видалення попереднього розміщення
-        clearLeftBoardShips();
-        for (Ship ship : placedShips) {
-            List<int[]> coordinates = ship.getCoordinates();
-            int shipLength = ship.getLength();
-            boolean isVertical = false;
-            if (shipLength > 1) {
-                if (coordinates.get(0)[1] == coordinates.get(1)[1]) {
-                    isVertical = true;
-                }
-            }
-
-            for (int i = 0; i < shipLength; i++) {
-                int[] coord = coordinates.get(i);
-                int row = coord[0];
-                int col = coord[1];
-                if (playerShipButtons[row][col] != null) {
-                    ImageIcon currentIcon;
-
-
-                    // розміри кнопки для масштабування зображення
-                    int buttonWidth = playerShipButtons[row][col].getWidth();
-                    int buttonHeight = playerShipButtons[row][col].getHeight();
-
-
-                    // перевірка чи розміри підходять
-                    if (buttonWidth <= 0 || buttonHeight <= 0) {
-                        buttonWidth = 50; // розмір по дефолту
-                        buttonHeight = 50;
-                    }
-                    if (shipLength == 1) {
-                        currentIcon = headIcon;
-                    } else if (i == 0) {
-                        if (isVertical) {
-                            currentIcon = headIcon;
-                        } else {
-                            currentIcon = pochatokKorIcon;
-                        }
-                    } else if (i == shipLength - 1) {
-                        if (isVertical) {
-                            currentIcon = botKorVertIcon;
-                        } else {
-                            currentIcon = kinecKorIcon;
-                        }
-                    } else {
-                        if (isVertical) {
-                            currentIcon = centerKorVertIcon;
-                        } else {
-                            currentIcon = centerKorIcon;
-                        }
-                    }
-                    if (currentIcon != null) {
-
-                        // масштабування іконки до розміру кнопки
-                        Image scaledImage = currentIcon.getImage().getScaledInstance(buttonWidth, buttonHeight, Image.SCALE_SMOOTH);
-                        currentIcon = new ImageIcon(scaledImage);
-                        playerShipButtons[row][col].setIcon(currentIcon);
-                    }
-                    playerShipButtons[row][col].setText(null);
-                    playerShipButtons[row][col].setEnabled(false);
-                    playerShipButtons[row][col].setBackground(Color.GRAY);
-                }
-            }
-        }
-    }
-
-    // для очищення відображення кораблів на лівій дошці (перенесено з MainFrame та адаптовано)
-    public void clearLeftBoardShips() {
-        try {
-        } catch (Exception e) {
-            System.err.println("Помилка завантаження зображення води: " + e.getMessage());
-        }
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                if (playerShipButtons[i][j] != null) {
-                    playerShipButtons[i][j].setIcon(null);
-                    playerShipButtons[i][j].setText("");
-                    playerShipButtons[i][j].setBackground(Color.WHITE); // повертаю білий фон
-                    playerShipButtons[i][j].setEnabled(true); // клітинки знову ектів)
-                }
-            }
-        }
-    }
-
     // метод для створення панелі з заданим кольором фону (статичний, залишається таким)
     public static JPanel getPanel(Color backgroundColor) {
         JPanel panel = new JPanel(new BorderLayout()) {
