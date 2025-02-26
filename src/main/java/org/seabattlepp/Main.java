@@ -1,8 +1,10 @@
 package org.seabattlepp;
+import org.seabattlepp.gui.MainFrame;
+import javax.swing.SwingUtilities;
+import org.seabattlepp.gui.MainFrame;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Sea Battle project is ready for development!");
-
+        SwingUtilities.invokeLater(MainFrame::new);
     }
 }
