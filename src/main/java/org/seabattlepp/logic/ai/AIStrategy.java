@@ -194,6 +194,6 @@ public class AIStrategy {
         targetingDirections = null;
         currentDirectionIndex = 0;
         targetedShipSegments = null;
-        consecutiveHitsInDirection = 0; 
+        consecutiveHitsInDirection = 0;
     }
 }
