@@ -1,3 +1,4 @@
+/*
 package org.seabattlepp.logic;
 
 import org.seabattlepp.gui.BoardPanel;
@@ -38,4 +39,4 @@ public class PlayerLogic {
             gameLogic.startComputerTurn(); // Викликається тільки після промаху гравця
         }
     }
-}
+}*/

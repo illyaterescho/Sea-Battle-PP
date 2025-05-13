@@ -1,3 +1,4 @@
+/*
 package org.seabattlepp.ships;
 
 import java.util.*;
@@ -80,4 +81,4 @@ public class ShipPlacer {
         }
         return coordinateStrings;
     }
-}
+}*/

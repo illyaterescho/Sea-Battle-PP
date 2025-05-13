@@ -1,3 +1,4 @@
+/*
 package org.seabattlepp.ships;
 
 import java.util.List;
@@ -43,4 +44,4 @@ public class Ship {
     public boolean isSunk() {
         return hitsTaken >= length;
     }
-}
+}*/

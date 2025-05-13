@@ -1,3 +1,4 @@
+/*
 package org.seabattlepp.logic.ai;
 
 import org.seabattlepp.gui.BoardPanel;
@@ -76,4 +77,4 @@ public class AILogic {
         }
         return hit;
     }
-}
+}*/
