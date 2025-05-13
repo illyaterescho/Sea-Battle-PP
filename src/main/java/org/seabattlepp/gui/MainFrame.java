@@ -8,10 +8,7 @@ public class MainFrame extends JFrame {
     private BoardPanel boardPanel;
     private ShipPanel shipPanel;
     private ButtonPanel buttonPanel;
-    private RoundedButton randomButton;
-    private JButton startButton;
-    private JButton resetButton;
-    private JButton exitButton;
+
 
     public MainFrame() {
 
@@ -34,10 +31,6 @@ public class MainFrame extends JFrame {
         shipPanel = new ShipPanel();
 
         buttonPanel = new ButtonPanel();
-        startButton = buttonPanel.getStartButton();
-        resetButton = buttonPanel.getResetButton();
-        exitButton = buttonPanel.getExitButton();
-
         add(boardPanel, BorderLayout.CENTER);
         add(shipPanel, BorderLayout.SOUTH);
         add(buttonPanel, BorderLayout.NORTH);
@@ -46,6 +39,18 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
+}
+
+    //    private RoundedButton randomButton;
+//    private JButton startButton;
+//    private JButton resetButton;
+//    private JButton exitButton;
+
+    //        startButton = buttonPanel.getStartButton();
+//        resetButton = buttonPanel.getResetButton();
+//        exitButton = buttonPanel.getExitButton();
+
+
 //        for (Component comp : shipPanel.getComponents()) {
 //            if (comp instanceof RoundedButton && ((RoundedButton) comp).getText().equals("Рандом")) {
 //                randomButton = (RoundedButton) comp;
@@ -91,4 +96,3 @@ public class MainFrame extends JFrame {
 //            randomButton.setEnabled(false);
 //        }
 //    }
-}
