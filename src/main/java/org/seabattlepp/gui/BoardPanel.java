@@ -9,7 +9,7 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.List;
+//import java.util.List;
 
 public class BoardPanel extends JPanel {
 
@@ -17,7 +17,7 @@ public class BoardPanel extends JPanel {
     public final ShipButton[][] computerShipButtons = new ShipButton[11][11];
     public MainFrame MainFrame;
 //    public GameLogic gameLogic;
-    private boolean isGameStarted = false;
+//    private boolean isGameStarted = false;
 
     public BoardPanel(MainFrame mainFrame) {
         this.MainFrame = mainFrame;
@@ -65,8 +65,8 @@ public class BoardPanel extends JPanel {
                 } else if (i > 0) {
                     ShipButton cell = new ShipButton();
                     computerShipButtons[i][j] = cell;
-                    final int row = i;
-                    final int col = j;
+//                    final int row = i;
+//                    final int col = j;
 //                    cell.setEnabled(true);
 //                    cell.addActionListener(e -> {
 //                        if (isGameStarted && gameLogic.isPlayerTurn()) { // перевірка черги гравця
