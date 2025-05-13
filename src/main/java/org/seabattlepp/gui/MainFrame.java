@@ -45,38 +45,37 @@ public class MainFrame extends JFrame {
             }
         }
 
-        if (randomButton != null) {
-            randomButton.setEnabled(false);
-        }
-
-        if (randomButton != null) {
-            randomButton.addActionListener(e -> boardPanel.placeShipsRandomlyOnLeftBoard());
-        }
-
-        if (startButton != null) {
-            startButton.addActionListener(e -> {
-                if (!boardPanel.isGameStarted()) { // перевіряємо чи гра почалась
-                    boardPanel.placeShipsRandomlyOnRightBoard();
-                    boardPanel.setGameStarted(true);
-                    if (randomButton != null) {
-                        randomButton.setEnabled(true);
-                    }
-                    boardPanel.gameLogic.startGame(); // старт для початку гри
-                    startButton.setEnabled(false); // кнопка Початок Гри не активна стає після початку
-                }
-            });
-        }
-
-        if (resetButton != null) {
-            resetButton.addActionListener(e -> {
-                boardPanel.resetBoards();
-                if (randomButton != null) {
-                    randomButton.setEnabled(false);
-                }
-                startButton.setEnabled(true); // після скидання робимо Початок Гри знову активною
-            });
-        }
-
+//        if (randomButton != null) {
+//            randomButton.setEnabled(false);
+//        }
+//        if (randomButton != null) {
+//            randomButton.addActionListener(e -> boardPanel.placeShipsRandomlyOnLeftBoard());
+//        }
+//
+//        if (startButton != null) {
+//            startButton.addActionListener(e -> {
+//                if (!boardPanel.isGameStarted()) { // перевіряємо чи гра почалась
+//                    boardPanel.placeShipsRandomlyOnRightBoard();
+//                    boardPanel.setGameStarted(true);
+//                    if (randomButton != null) {
+//                        randomButton.setEnabled(true);
+//                    }
+//                    boardPanel.gameLogic.startGame(); // старт для початку гри
+//                    startButton.setEnabled(false); // кнопка Початок Гри не активна стає після початку
+//                }
+//            });
+//        }
+//
+//        if (resetButton != null) {
+//            resetButton.addActionListener(e -> {
+//                boardPanel.resetBoards();
+//                if (randomButton != null) {
+//                    randomButton.setEnabled(false);
+//                }
+//                startButton.setEnabled(true); // після скидання робимо Початок Гри знову активною
+//            });
+//        }
+//
 
         add(boardPanel, BorderLayout.CENTER);
         add(shipPanel, BorderLayout.SOUTH);
@@ -87,9 +86,9 @@ public class MainFrame extends JFrame {
         setVisible(true);
     }
 
-    public void disableRandomButton() {
-        if (randomButton != null) {
-            randomButton.setEnabled(false);
-        }
-    }
+//    public void disableRandomButton() {
+//        if (randomButton != null) {
+//            randomButton.setEnabled(false);
+//        }
+//    }
 }
