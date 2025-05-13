@@ -1,3 +1,4 @@
+/*
 package org.seabattlepp.ships;
 
 import java.util.List;
@@ -34,3 +35,4 @@ public class ShipValidator {
         return occupiedCoordinates.contains(row + "," + col);
     }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package org.seabattlepp.logic.ai;
 
 import org.seabattlepp.gui.ShipButton;
@@ -22,4 +23,4 @@ public class AIPlayer {
     public void resetAI() {
         strategy.resetAI();
     }
-}
+}*/

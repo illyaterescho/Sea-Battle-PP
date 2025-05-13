@@ -1,3 +1,4 @@
+/*
 package org.seabattlepp.logic.ai;
 
 import org.seabattlepp.gui.ShipButton;
@@ -196,4 +197,4 @@ public class AIStrategy {
         targetedShipSegments = null;
         consecutiveHitsInDirection = 0; 
     }
-}
+}*/

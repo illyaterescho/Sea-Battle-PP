@@ -1,3 +1,4 @@
+/*
 package org.seabattlepp.logic;
 
 import org.seabattlepp.gui.BoardPanel;
@@ -206,4 +207,4 @@ public class GameLogic {
     private boolean isValidCell(int row, int col) {
         return row > 0 && row <= 10 && col > 0 && col <= 10;
     }
-}
+}*/

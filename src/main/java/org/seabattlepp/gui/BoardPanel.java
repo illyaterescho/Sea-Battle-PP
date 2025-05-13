@@ -67,7 +67,7 @@ public class BoardPanel extends JPanel {
                     computerShipButtons[i][j] = cell;
                     final int row = i;
                     final int col = j;
-                    cell.setEnabled(true);
+//                    cell.setEnabled(true);
 //                    cell.addActionListener(e -> {
 //                        if (isGameStarted && gameLogic.isPlayerTurn()) { // перевірка черги гравця
 //                            gameLogic.processShot(row, col);
@@ -100,7 +100,7 @@ public class BoardPanel extends JPanel {
                 } else if (i > 0) {
                     ShipButton cell = new ShipButton();
                     playerShipButtons[i][j] = cell;
-                    cell.setEnabled(true);
+//                    cell.setEnabled(true);
                     grid2.add(cell);
                 } else {
                     grid2.add(new JLabel(""));
@@ -110,6 +110,38 @@ public class BoardPanel extends JPanel {
         return grid2;
     }
 
+    public static JPanel getPanel(Color backgroundColor) {
+        JPanel panel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(backgroundColor);
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 220, 200);
+            }
+        };
+        panel.setOpaque(true);
+        return panel;
+    }
+
+    public static JPanel getJPanel(Color backgroundColor) {
+        JPanel grid = new JPanel(new GridLayout(11, 11, 15, 15)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(backgroundColor);
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 200, 200);
+                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 200, 200);
+            }
+        };
+        grid.setBorder(new CompoundBorder(new RoundBorder(Color.BLACK, 3, 200), new EmptyBorder(5, 5, 80, 50)));
+        grid.setOpaque(false);
+        return grid;
+    }
+}
 //    public void placeShipsRandomlyOnLeftBoard() {
 //        ShipValidator validator = new ShipValidator();
 //        ShipPlacer placer = new ShipPlacer(validator);
@@ -167,24 +199,24 @@ public class BoardPanel extends JPanel {
 //    }
 
 
-    public void clearLeftBoardShips() {
-        try {
-        } catch (Exception e) {
-            System.err.println("Помилка завантаження зображення: " + e.getMessage());
-        }
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                if (playerShipButtons[i][j] != null) {
-                    playerShipButtons[i][j].setIcon(null); // очищення іконки
-                    playerShipButtons[i][j].setText("");    // Очищення тексту (якщо є)
-                    playerShipButtons[i][j].setBackground(Color.WHITE); // повернення фону до білого
-                    playerShipButtons[i][j].setEnabled(true);  // кнопки знову активні
-                    playerShipButtons[i][j].setOpaque(false);
-                    playerShipButtons[i][j].setUI(new javax.swing.plaf.basic.BasicButtonUI()); // повернення до стандартного UI
-                }
-            }
-        }
-    }
+//    public void clearLeftBoardShips() {
+//        try {
+//        } catch (Exception e) {
+//            System.err.println("Помилка завантаження зображення: " + e.getMessage());
+//        }
+//        for (int i = 1; i <= 10; i++) {
+//            for (int j = 1; j <= 10; j++) {
+//                if (playerShipButtons[i][j] != null) {
+//                    playerShipButtons[i][j].setIcon(null); // очищення іконки
+//                    playerShipButtons[i][j].setText("");    // Очищення тексту (якщо є)
+//                    playerShipButtons[i][j].setBackground(Color.WHITE); // повернення фону до білого
+//                    playerShipButtons[i][j].setEnabled(true);  // кнопки знову активні
+//                    playerShipButtons[i][j].setOpaque(false);
+//                    playerShipButtons[i][j].setUI(new javax.swing.plaf.basic.BasicButtonUI()); // повернення до стандартного UI
+//                }
+//            }
+//        }
+//    }
 
 //    public void clearRightBoardShips() {
 //        for (int i = 1; i <= 10; i++) {
@@ -224,7 +256,7 @@ public class BoardPanel extends JPanel {
 //        return isGameStarted;
 //    }
 
-    // для того щоб кнопки не багались і були активні до початку гри
+// для того щоб кнопки не багались і були активні до початку гри
 //    public void enablePlayerButtonsForPlacement() {
 //        for (int i = 1; i <= 10; i++) {
 //            for (int j = 1; j <= 10; j++) {
@@ -236,7 +268,7 @@ public class BoardPanel extends JPanel {
 //    }
 
 
-    // вмикаємо кнопки пк коли він стріляє
+// вмикаємо кнопки пк коли він стріляє
 //    public void enableComputerButtons() {
 //        for (int i = 1; i <= 10; i++) {
 //            for (int j = 1; j <= 10; j++) {
@@ -284,37 +316,3 @@ public class BoardPanel extends JPanel {
 //            }
 //        }
 //    }
-
-
-    public static JPanel getPanel(Color backgroundColor) {
-        JPanel panel = new JPanel(new BorderLayout()) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(backgroundColor);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 220, 200);
-            }
-        };
-        panel.setOpaque(true);
-        return panel;
-    }
-
-    public static JPanel getJPanel(Color backgroundColor) {
-        JPanel grid = new JPanel(new GridLayout(11, 11, 15, 15)) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setColor(backgroundColor);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 200, 200);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 200, 200);
-            }
-        };
-        grid.setBorder(new CompoundBorder(new RoundBorder(Color.BLACK, 3, 200), new EmptyBorder(5, 5, 80, 50)));
-        grid.setOpaque(false);
-        return grid;
-    }
-}

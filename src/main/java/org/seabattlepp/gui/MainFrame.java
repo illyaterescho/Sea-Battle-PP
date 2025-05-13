@@ -38,12 +38,20 @@ public class MainFrame extends JFrame {
         resetButton = buttonPanel.getResetButton();
         exitButton = buttonPanel.getExitButton();
 
-        for (Component comp : shipPanel.getComponents()) {
-            if (comp instanceof RoundedButton && ((RoundedButton) comp).getText().equals("Рандом")) {
-                randomButton = (RoundedButton) comp;
-                break;
-            }
-        }
+        add(boardPanel, BorderLayout.CENTER);
+        add(shipPanel, BorderLayout.SOUTH);
+        add(buttonPanel, BorderLayout.NORTH);
+
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+//        for (Component comp : shipPanel.getComponents()) {
+//            if (comp instanceof RoundedButton && ((RoundedButton) comp).getText().equals("Рандом")) {
+//                randomButton = (RoundedButton) comp;
+//                break;
+//            }
+//        }
 
 //        if (randomButton != null) {
 //            randomButton.setEnabled(false);
@@ -77,14 +85,6 @@ public class MainFrame extends JFrame {
 //        }
 //
 
-        add(boardPanel, BorderLayout.CENTER);
-        add(shipPanel, BorderLayout.SOUTH);
-        add(buttonPanel, BorderLayout.NORTH);
-
-        pack();
-        setLocationRelativeTo(null);
-        setVisible(true);
-    }
 
 //    public void disableRandomButton() {
 //        if (randomButton != null) {
