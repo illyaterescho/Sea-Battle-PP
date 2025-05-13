@@ -3,56 +3,93 @@ package org.seabattlepp.gui;
 import javax.swing.*;
 import java.awt.*;
 
-
 public class MainFrame extends JFrame {
 
-    private BoardPanel boardPanel; // панель для дошок
-    private ShipPanel shipPanel;   // панель для кораблів
-    private ButtonPanel buttonPanel; // панель для кнопок
-    private RoundedButton randomButton; // кнопка "Рандом"
+    private BoardPanel boardPanel;
+    private ShipPanel shipPanel;
+    private ButtonPanel buttonPanel;
+    private RoundedButton randomButton;
+    private JButton startButton;
+    private JButton resetButton;
+    private JButton exitButton;
 
     public MainFrame() {
 
-        // налаштування вікна заголовок, іконка, закриття
         setTitle("Морський Бій");
         try {
-            Image image = Toolkit.getDefaultToolkit().getImage("src/main/java/org/seabattlepp/img/icon.jpg");
+            Image image = Toolkit.getDefaultToolkit().getImage("src/main/java/org/seabattlepp/img/icon.png");
             setIconImage(image);
         } catch (Exception e) {
-            System.err.println("Помилка завантаження іконки: " + e.getMessage());
+            System.err.println("помилка завантаження іконки: " + e.getMessage());
         }
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(20, 20));
 
-        // створення панелі та відступів
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
 
-        // створення панелі для дошок
         boardPanel = new BoardPanel(this);
 
-        // створення панелі з кораблями (знизу)
         shipPanel = new ShipPanel();
 
-        // створення панелі з кнопками (зверху)
         buttonPanel = new ButtonPanel();
+        startButton = buttonPanel.getStartButton();
+        resetButton = buttonPanel.getResetButton();
+        exitButton = buttonPanel.getExitButton();
 
-        // отримання кнопки "Рандом" з shipPanel після того як ShipPanel спрацювало
         for (Component comp : shipPanel.getComponents()) {
             if (comp instanceof RoundedButton && ((RoundedButton) comp).getText().equals("Рандом")) {
                 randomButton = (RoundedButton) comp;
                 break;
             }
         }
-        // додавання компонентів на головне вікно
+
+        if (randomButton != null) {
+            randomButton.setEnabled(false);
+        }
+
+        if (randomButton != null) {
+            randomButton.addActionListener(e -> boardPanel.placeShipsRandomlyOnLeftBoard());
+        }
+
+        if (startButton != null) {
+            startButton.addActionListener(e -> {
+                if (!boardPanel.isGameStarted()) { // перевіряємо чи гра почалась
+                    boardPanel.placeShipsRandomlyOnRightBoard();
+                    boardPanel.setGameStarted(true);
+                    if (randomButton != null) {
+                        randomButton.setEnabled(true);
+                    }
+                    boardPanel.gameLogic.startGame(); // старт для початку гри
+                    startButton.setEnabled(false); // кнопка Початок Гри не активна стає після початку
+                }
+            });
+        }
+
+        if (resetButton != null) {
+            resetButton.addActionListener(e -> {
+                boardPanel.resetBoards();
+                if (randomButton != null) {
+                    randomButton.setEnabled(false);
+                }
+                startButton.setEnabled(true); // після скидання робимо Початок Гри знову активною
+            });
+        }
+
+
         add(boardPanel, BorderLayout.CENTER);
         add(shipPanel, BorderLayout.SOUTH);
         add(buttonPanel, BorderLayout.NORTH);
 
-        // налаштування розміру та відображення вікна
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    public void disableRandomButton() {
+        if (randomButton != null) {
+            randomButton.setEnabled(false);
+        }
     }
 }
