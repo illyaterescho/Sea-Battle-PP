@@ -3,23 +3,21 @@ package org.seabattlepp.gui;
 import javax.swing.*;
 import java.awt.*;
 import org.seabattlepp.logic.GameLogic;
-import org.seabattlepp.ships.BoardController;
 
 public class MainFrame extends JFrame {
 
     // панельки
-    private BoardPanel boardPanel;
-    private ShipPanel shipPanel;
-    private ButtonPanel buttonPanel;
+    private final BoardPanel boardPanel;
+    private final ShipPanel shipPanel;
+    private final ButtonPanel buttonPanel;
 
-    // контролер і логіка
-    private BoardController boardController;
-    private GameLogic gameLogic;
+    // логіка
+    private final GameLogic gameLogic;
 
     // кнопки
     private RoundedButton randomButton;
-    private JButton startButton;
-    private JButton resetButton;
+    private final JButton startButton;
+    private final JButton resetButton;
 
     public MainFrame() {
         setTitle("Морський Бій");
@@ -41,12 +39,10 @@ public class MainFrame extends JFrame {
         shipPanel = new ShipPanel();
         buttonPanel = new ButtonPanel();
 
-        // 2️⃣ Створюємо контролер дошки
-        boardController = new BoardController(boardPanel);
 
         // 3️⃣ Створюємо логіку гри
-        gameLogic = new GameLogic(this, boardController, boardPanel.computerShipButtons, boardPanel.playerShipButtons);
-        boardController.setGameLogic(gameLogic);
+        gameLogic = new GameLogic(this, boardPanel, boardPanel.computerShipButtons, boardPanel.playerShipButtons);
+
 
         // 4️⃣ Кнопки
         startButton = buttonPanel.getStartButton();
@@ -62,14 +58,13 @@ public class MainFrame extends JFrame {
 
         if (randomButton != null) {
             randomButton.setEnabled(false);
-            randomButton.addActionListener(e -> boardController.placeShipsRandomlyOnLeftBoard());
+            randomButton.addActionListener(e -> gameLogic.placeShipsRandomlyOnLeftBoard());
         }
 
         if (startButton != null) {
             startButton.addActionListener(e -> {
-                if (!boardController.isGameStarted()) {
-                    boardController.placeShipsRandomlyOnRightBoard();
-                    boardController.setGameStarted(true);
+                if (!gameLogic.isGameStarted()) {
+                    gameLogic.placeShipsRandomlyOnRightBoard();
                     if (randomButton != null) {
                         randomButton.setEnabled(true);
                     }
@@ -81,7 +76,7 @@ public class MainFrame extends JFrame {
 
         if (resetButton != null) {
             resetButton.addActionListener(e -> {
-                boardController.resetBoards();
+                gameLogic.resetBoards();
                 if (randomButton != null) {
                     randomButton.setEnabled(false);
                 }
@@ -98,6 +93,7 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
+
     public void disableRandomButton() {
         if (randomButton != null) {
             randomButton.setEnabled(false);

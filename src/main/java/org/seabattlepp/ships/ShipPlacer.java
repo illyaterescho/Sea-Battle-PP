@@ -41,16 +41,16 @@ public class ShipPlacer {
     private List<Ship> createShipList() {
         List<org.seabattlepp.ships.Ship> ships = new ArrayList<>();
 
-        ships.add(new Ship("Авіаносець", 5));
-        ships.add(new Ship("Броненосець", 4));
-        ships.add(new Ship("Броненосець", 4));
-        ships.add(new Ship("Крейсер", 3));
-        ships.add(new Ship("Крейсер", 3));
-        ships.add(new Ship("Крейсер", 3));
-        ships.add(new Ship("Руйнівник", 2));
-        ships.add(new Ship("Руйнівник", 2));
-        ships.add(new Ship("Руйнівник", 2));
-        ships.add(new Ship("Руйнівник", 2));
+        ships.add(new Ship(5));
+        ships.add(new Ship(4));
+        ships.add(new Ship(4));
+        ships.add(new Ship(3));
+        ships.add(new Ship(3));
+        ships.add(new Ship(3));
+        ships.add(new Ship(2));
+        ships.add(new Ship(2));
+        ships.add(new Ship(2));
+        ships.add(new Ship(2));
 
         return ships;
     }

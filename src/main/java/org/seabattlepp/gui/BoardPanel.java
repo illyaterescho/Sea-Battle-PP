@@ -4,7 +4,6 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import org.seabattlepp.ships.BoardController;
 
 public class BoardPanel extends JPanel {
 
@@ -12,7 +11,6 @@ public class BoardPanel extends JPanel {
     public final ShipButton[][] computerShipButtons = new ShipButton[11][11];
 
     public MainFrame MainFrame;
-    private BoardController boardController;
 
     public BoardPanel(MainFrame mainFrame) {
         this.MainFrame = mainFrame;
@@ -134,14 +132,5 @@ public class BoardPanel extends JPanel {
         grid.setBorder(new CompoundBorder(new RoundBorder(Color.BLACK, 3, 200), new EmptyBorder(5, 5, 80, 50)));
         grid.setOpaque(false);
         return grid;
-    }
-
-    // Прив’язка контролера дошки (BoardController)
-    public void setBoardController(BoardController controller) {
-        this.boardController = controller;
-    }
-
-    public BoardController getBoardController() {
-        return boardController;
     }
 }

@@ -3,8 +3,7 @@ package org.seabattlepp.logic.ai;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.logic.GameLogic;
 import org.seabattlepp.ships.Ship;
-import org.seabattlepp.ships.BoardController;
-
+import org.seabattlepp.gui.BoardPanel;
 
 import javax.swing.*;
 
@@ -12,12 +11,16 @@ public class AILogic {
 
     private AIPlayer aiPlayer;
     private final GameLogic gameLogic; // Зв'язок з GameLogic
-    private final BoardController boardController; // ✅ Замість прямого доступу до BoardPanel
+    private final BoardPanel boardPanel;
     private final ShipButton[][] playerShipButtons;
 
-    public AILogic(GameLogic gameLogic, BoardController boardController, ShipButton[][] playerShipButtons) {
+    public AILogic(
+            GameLogic gameLogic,
+            BoardPanel boardPanel,
+            ShipButton[][] playerShipButtons
+    ) {
         this.gameLogic = gameLogic;
-        this.boardController = boardController;
+        this.boardPanel = boardPanel;
         this.playerShipButtons = playerShipButtons;
         this.aiPlayer = new AIPlayer();
     }
@@ -27,12 +30,12 @@ public class AILogic {
     }
 
     public void startComputerTurn() {
-        if (!boardController.isGameStarted()) {
+        if (!gameLogic.isGameStarted()) {
             return;
         }
         gameLogic.setPlayerTurn(false);
-        boardController.disableComputerButtons();
-        boardController.disablePlayerButtons();
+        gameLogic.disableComputerButtons();
+        gameLogic.disablePlayerButtons();
 
         int[] shotCoordinates = aiPlayer.makeTurn(playerShipButtons);
 
@@ -45,9 +48,11 @@ public class AILogic {
         Timer timer = new Timer(700, e -> {
             boolean hit = processComputerShot(shotCoordinates[0], shotCoordinates[1]);
             if (!hit) {
-                gameLogic.startPlayerTurn();
-            } else if (boardController.isGameStarted()) {
-                startComputerTurn();
+                // повертаємо хід гравцю
+                gameLogic.setPlayerTurn(true);
+                gameLogic.enableComputerButtons(); // дозволяємо натискати
+            } else if (gameLogic.isGameStarted()) {
+                startComputerTurn(); // якщо влучив — продовжує
             }
         });
         timer.setRepeats(false);

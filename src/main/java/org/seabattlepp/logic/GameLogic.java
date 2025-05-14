@@ -1,40 +1,205 @@
 package org.seabattlepp.logic;
 
 import org.seabattlepp.logic.ai.AILogic;
-import org.seabattlepp.ships.BoardController;
 import org.seabattlepp.ships.Ship;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.gui.MainFrame;
+import org.seabattlepp.gui.BoardPanel;
+import org.seabattlepp.ships.ShipPlacer;
+import org.seabattlepp.ships.ShipValidator;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicButtonUI;
+import java.awt.*;
 import java.util.List;
 
 public class GameLogic {
 
-    private final BoardController boardController;
     private final MainFrame mainFrame;
+    private final BoardPanel boardPanel;
+
     private final ShipButton[][] computerShipButtons;
     private final ShipButton[][] playerShipButtons;
+
     private Ship[][] computerShipsLocations;
     private Ship[][] playerShipsLocations;
+
+    private boolean isGameStarted;
     private boolean isPlayerTurn;
 
     private final AILogic aiLogic;
-    private final PlayerLogic playerLogic;
-    private final UIMarkingLogic uiMarkingLogic; // Додаємо UIMarkingLogic
+    private final UIMarkingLogic uiMarkingLogic;
 
-    public GameLogic(MainFrame mainFrame, BoardController boardController, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
-        this.boardController = boardController;
+    public GameLogic(
+            MainFrame mainFrame,
+            BoardPanel boardPanel,
+            ShipButton[][] computerShipButtons,
+            ShipButton[][] playerShipButtons
+    ) {
+        this.boardPanel = boardPanel;
+        this.mainFrame = mainFrame;
+
         this.computerShipButtons = computerShipButtons;
         this.playerShipButtons = playerShipButtons;
-        this.mainFrame = mainFrame;
-        this.aiLogic = new AILogic(this, boardController, playerShipButtons);
-        this.playerLogic = new PlayerLogic(this, boardController, computerShipButtons);
-        this.uiMarkingLogic = new UIMarkingLogic(this, boardController, computerShipButtons, playerShipButtons);
-        this.isPlayerTurn = true; // Гравець починає
+
+        this.aiLogic = new AILogic(this, boardPanel, playerShipButtons);
+        this.uiMarkingLogic = new UIMarkingLogic(this, boardPanel, computerShipButtons, playerShipButtons);
+        this.isPlayerTurn = true;
+        this.isGameStarted = false;
+
         resetComputerShipsLocations();
         resetPlayerShipsLocations();
     }
+
+    public void placeShipsRandomlyOnLeftBoard() {
+        ShipPlacer placer = new ShipPlacer(new ShipValidator());
+        List<Ship> placedShips = placer.placeShipsRandomly();
+        setPlayerShips(placedShips);
+
+        clearLeftBoardShips();
+        for (Ship ship : placedShips) {
+            for (int[] coord : ship.getCoordinates()) {
+                int row = coord[0], col = coord[1];
+                ShipButton btn = playerShipButtons[row][col];
+                if (btn != null) {
+                    btn.setText("⚓");
+                    btn.setFont(new Font("Inter", Font.BOLD, 50));
+                    btn.setForeground(Color.BLACK);
+                    btn.setBackground(Color.WHITE);
+                    btn.setEnabled(true);
+                    btn.setIcon(null);
+                }
+            }
+        }
+    }
+
+    public void placeShipsRandomlyOnRightBoard() {
+        ShipPlacer placer = new ShipPlacer(new ShipValidator());
+        List<Ship> placedShips = placer.placeShipsRandomly();
+        setComputerShips(placedShips);
+
+        clearRightBoardShips();
+        for (Ship ship : placedShips) {
+            for (int[] coord : ship.getCoordinates()) {
+                int row = coord[0], col = coord[1];
+                ShipButton button = computerShipButtons[row][col];
+                if (button != null) {
+                    button.setBackground(Color.WHITE);
+                    button.setFont(new Font("Inter", Font.BOLD, 25));
+                    button.setEnabled(true);
+                    button.setOpaque(false);
+                    button.setIcon(null);
+                }
+            }
+        }
+    }
+
+    public void clearLeftBoardShips() {
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                ShipButton button = playerShipButtons[i][j];
+                if (button != null) {
+                    button.setText("");
+                    button.setIcon(null);
+                    button.setBackground(Color.WHITE);
+                    button.setEnabled(true);
+                    button.setOpaque(false);
+                    button.setUI(new BasicButtonUI());
+                }
+            }
+        }
+    }
+
+
+    public void clearRightBoardShips() {
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                ShipButton button = computerShipButtons[i][j];
+                if (button != null) {
+                    button.setText("");
+                    button.setIcon(null);
+                    button.setBackground(Color.WHITE);
+                    button.setEnabled(true);
+                    button.setOpaque(false);
+                    button.setUI(new BasicButtonUI());
+                }
+            }
+        }
+    }
+
+    public void resetBoards() {
+        clearLeftBoardShips();
+        clearRightBoardShips();
+        isGameStarted = false;
+        resetGame();
+        enablePlayerButtonsForPlacement();
+        disableComputerButtons();
+    }
+
+    public void setGameStarted(boolean started) {
+        isGameStarted = started;
+        if (started && !isPlayerTurn()) startComputerTurn();
+    }
+
+    public boolean isGameStarted() {
+        return isGameStarted;
+    }
+
+    public void enablePlayerButtonsForPlacement() {
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                ShipButton button = playerShipButtons[i][j];
+                if (button != null) {
+                    button.setEnabled(true);
+                }
+            }
+        }
+    }
+
+    public void enableComputerButtons() {
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                ShipButton button = computerShipButtons[i][j];
+                if (button != null && button.getIcon() == null && button.getBackground() != Color.RED) {
+                    button.setEnabled(true);
+                }
+            }
+        }
+    }
+
+    public void enablePlayerButtons() {
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                ShipButton button = playerShipButtons[i][j];
+                if (button != null && button.getIcon() == null && button.getBackground() != Color.RED) {
+                    button.setEnabled(true);
+                }
+            }
+        }
+    }
+
+    public void disableComputerButtons() {
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                ShipButton button = computerShipButtons[i][j];
+                if (button != null) {
+                    button.setEnabled(false);
+                }
+            }
+        }
+    }
+
+    public void disablePlayerButtons() {
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                ShipButton button = playerShipButtons[i][j];
+                if (button != null) {
+                    button.setEnabled(false);
+                }
+            }
+        }
+    }
+
 
     public boolean isPlayerTurn() {
         return isPlayerTurn;
@@ -45,29 +210,79 @@ public class GameLogic {
         isPlayerTurn = playerTurn;
     }
 
+    public void processShot(int row, int col) {
+        if (!isPlayerTurn) return;
+
+        Ship ship = getShipAt(row, col);
+        boolean hit = ship != null;
+        boolean sunk = false;
+
+        if (hit) {
+            sunk = markHit(row, col, ship);
+            checkGameEnd(); // додай завжди
+            if (!sunk) {
+                enableComputerButtons(); // дозвіл стріляти далі
+            }
+        } else {
+            markMiss(row, col);
+            setPlayerTurn(false);
+            disableComputerButtons();
+            enablePlayerButtons();
+            startComputerTurn();
+            // AI починає хід
+        }
+
+        if (hit && !sunk) {
+            // якщо просто влучив — гравець продовжує
+            enableComputerButtons();
+        }
+    }
+
+    public void startPlayerTurn() {
+        setPlayerTurn(true);
+        enableComputerButtons();
+    }
+
     // ▶️ Старт гри
     public void startGame() {
         isPlayerTurn = true;
-        boardController.setGameStarted(true);
-        boardController.enableComputerButtons();
-        boardController.disablePlayerButtons();
-        aiLogic.resetAI(); // Використовуємо AILogic для скидання AI
-        playerLogic.startPlayerTurn(); // Починаємо хід гравця через PlayerLogic
+        setGameStarted(true);
+        enableComputerButtons();
+        disablePlayerButtons();
+        aiLogic.resetAI();
+        startPlayerTurn();
+
+        addComputerBoardListeners();
+    }
+
+    private void addComputerBoardListeners() {
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                int row = i;
+                int col = j;
+                ShipButton button = computerShipButtons[row][col];
+
+                if (button != null) {
+                    // очищення попередніх слухачів
+                    for (var l : button.getActionListeners()) {
+                        button.removeActionListener(l);
+                    }
+
+                    // додаємо слухача
+                    button.addActionListener(e -> {
+                        if (button.isEnabled()) {
+                            processShot(row, col); // Гравець стріляє
+                            button.setEnabled(false); // блокуємо після кліку
+                        }
+                    });
+                }
+            }
+        }
     }
 
     // ⏩ Хід комп'ютера
     public void startComputerTurn() {
-        aiLogic.startComputerTurn(); // початок ходу комп'ютера до AILogic
-    }
-
-    // 🔁 Повернення ходу гравцю
-    public void startPlayerTurn() {
-        playerLogic.startPlayerTurn();
-    }
-
-    // 🔫 Обробка кліку гравця по комп’ютеру
-    public void processShot(int row, int col) {
-        playerLogic.processShot(row, col); // бробку пострілу гравця до PlayerLogic
+        aiLogic.startComputerTurn();
     }
 
     // отримання корабля комп'ютера за координатами використовується PlayerLogic
@@ -106,7 +321,8 @@ public class GameLogic {
             if (sunk) {
                 uiMarkingLogic.markSunkShipPlayerBoard(ship); // Використовуємо UIMarkingLogic
             } else {
-                uiMarkingLogic.markHitSymbolPlayerBoard(playerShipButtons[row][col]);            }
+                uiMarkingLogic.markHitSymbolPlayerBoard(playerShipButtons[row][col]);
+            }
         }
         return sunk;
     }
@@ -199,14 +415,15 @@ public class GameLogic {
 
     // 🎯 Завершення гри: показ повідомлення, скидання стану
     private void endGame(boolean playerWon) {
-        if (playerWon) {
-            JOptionPane.showMessageDialog(mainFrame, "Ви перемогли!", "Кінець гри!", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(mainFrame, "Комп'ютер переміг!", "Кінець гри!", JOptionPane.INFORMATION_MESSAGE);
-        }
-        boardController.setGameStarted(false);
-        mainFrame.disableRandomButton(); // прямо через MainFrame
-        boardController.resetBoards();
+        JOptionPane.showMessageDialog(
+                mainFrame,
+                playerWon ? "Ви перемогли!" : "Комп'ютер переміг!",
+                "Кінець гри!",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+        setGameStarted(false);
+        mainFrame.disableRandomButton();
+        resetBoards();
         aiLogic.resetAI();
     }
 
@@ -214,7 +431,7 @@ public class GameLogic {
     public void resetGame() {
         resetComputerShipsLocations();
         resetPlayerShipsLocations();
-        aiLogic.resetAI(); // AILogic для скидання AI
-        isPlayerTurn = true; // після скидання гри гравець починає першим
+        aiLogic.resetAI();
+        isPlayerTurn = true;
     }
 }

@@ -6,18 +6,22 @@ import org.seabattlepp.ships.Ship;
 
 import javax.swing.*;
 import java.awt.*;
-import org.seabattlepp.ships.BoardController;
 
 public class UIMarkingLogic {
 
-    private final BoardController boardController;
+    private final BoardPanel boardPanel;
     private final ShipButton[][] computerShipButtons;
     private final ShipButton[][] playerShipButtons;
     private final GameLogic gameLogic;
 
-    public UIMarkingLogic(GameLogic gameLogic, BoardController boardController, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
+    public UIMarkingLogic(
+            GameLogic gameLogic,
+            BoardPanel boardPanel,
+            ShipButton[][] computerShipButtons,
+            ShipButton[][] playerShipButtons
+    ) {
         this.gameLogic = gameLogic;
-        this.boardController = boardController;
+        this.boardPanel = boardPanel;
         this.computerShipButtons = computerShipButtons;
         this.playerShipButtons = playerShipButtons;
     }
