@@ -4,7 +4,6 @@ import org.seabattlepp.logic.ai.AILogic;
 import org.seabattlepp.ships.Ship;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.gui.MainFrame;
-import org.seabattlepp.gui.BoardPanel;
 import org.seabattlepp.ships.ShipPlacer;
 import org.seabattlepp.ships.ShipValidator;
 
@@ -16,7 +15,6 @@ import java.util.List;
 public class GameLogic {
 
     private final MainFrame mainFrame;
-    private final BoardPanel boardPanel;
 
     private final ShipButton[][] computerShipButtons;
     private final ShipButton[][] playerShipButtons;
@@ -32,18 +30,16 @@ public class GameLogic {
 
     public GameLogic(
             MainFrame mainFrame,
-            BoardPanel boardPanel,
             ShipButton[][] computerShipButtons,
             ShipButton[][] playerShipButtons
     ) {
-        this.boardPanel = boardPanel;
         this.mainFrame = mainFrame;
 
         this.computerShipButtons = computerShipButtons;
         this.playerShipButtons = playerShipButtons;
 
-        this.aiLogic = new AILogic(this, boardPanel, playerShipButtons);
-        this.uiMarkingLogic = new UIMarkingLogic(this, boardPanel, computerShipButtons, playerShipButtons);
+        this.aiLogic = new AILogic(this, playerShipButtons);
+        this.uiMarkingLogic = new UIMarkingLogic(this, computerShipButtons, playerShipButtons);
         this.isPlayerTurn = true;
         this.isGameStarted = false;
 
@@ -210,7 +206,7 @@ public class GameLogic {
         isPlayerTurn = playerTurn;
     }
 
-    public void processShot(int row, int col) {
+    public void processPlayerShot(int row, int col) {
         if (!isPlayerTurn) return;
 
         Ship ship = getShipAt(row, col);
@@ -271,7 +267,7 @@ public class GameLogic {
                     // додаємо слухача
                     button.addActionListener(e -> {
                         if (button.isEnabled()) {
-                            processShot(row, col); // Гравець стріляє
+                            processPlayerShot(row, col); // Гравець стріляє
                             button.setEnabled(false); // блокуємо після кліку
                         }
                     });
@@ -435,3 +431,4 @@ public class GameLogic {
         isPlayerTurn = true;
     }
 }
+// тут баги

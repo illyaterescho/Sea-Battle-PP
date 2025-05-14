@@ -9,19 +9,16 @@ import java.awt.*;
 
 public class UIMarkingLogic {
 
-    private final BoardPanel boardPanel;
     private final ShipButton[][] computerShipButtons;
     private final ShipButton[][] playerShipButtons;
     private final GameLogic gameLogic;
 
     public UIMarkingLogic(
             GameLogic gameLogic,
-            BoardPanel boardPanel,
             ShipButton[][] computerShipButtons,
             ShipButton[][] playerShipButtons
     ) {
         this.gameLogic = gameLogic;
-        this.boardPanel = boardPanel;
         this.computerShipButtons = computerShipButtons;
         this.playerShipButtons = playerShipButtons;
     }
@@ -223,3 +220,4 @@ public class UIMarkingLogic {
         return row >= 0 && row < 10 && col >= 0 && col < 10;
     }
 }
+// тут баги

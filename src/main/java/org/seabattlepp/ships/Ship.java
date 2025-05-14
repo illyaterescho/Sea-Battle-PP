@@ -3,7 +3,7 @@ package org.seabattlepp.ships;
 import java.util.List;
 
 public class Ship {
-    private int length;
+    private final int length;
     private List<int[]> coordinates;
     private int hitsTaken;
 

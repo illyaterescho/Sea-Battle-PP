@@ -1,11 +1,10 @@
 package org.seabattlepp.ships;
 
 import java.util.*;
-import java.util.Random;
 
 public class ShipPlacer {
-    private ShipValidator validator;
-    private Random random = new Random();
+    private final ShipValidator validator;
+    private final Random random = new Random();
 
     public ShipPlacer(ShipValidator validator) {
         this.validator = validator;

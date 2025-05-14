@@ -3,7 +3,6 @@ package org.seabattlepp.logic.ai;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.logic.GameLogic;
 import org.seabattlepp.ships.Ship;
-import org.seabattlepp.gui.BoardPanel;
 
 import javax.swing.*;
 
@@ -11,16 +10,13 @@ public class AILogic {
 
     private AIPlayer aiPlayer;
     private final GameLogic gameLogic; // Зв'язок з GameLogic
-    private final BoardPanel boardPanel;
     private final ShipButton[][] playerShipButtons;
 
     public AILogic(
             GameLogic gameLogic,
-            BoardPanel boardPanel,
             ShipButton[][] playerShipButtons
     ) {
         this.gameLogic = gameLogic;
-        this.boardPanel = boardPanel;
         this.playerShipButtons = playerShipButtons;
         this.aiPlayer = new AIPlayer();
     }
@@ -43,6 +39,7 @@ public class AILogic {
             gameLogic.startPlayerTurn();
             return;
         }
+
 
 
         Timer timer = new Timer(700, e -> {
@@ -83,3 +80,4 @@ public class AILogic {
         return hit;
     }
 }
+// тут баги

@@ -39,10 +39,8 @@ public class MainFrame extends JFrame {
         shipPanel = new ShipPanel();
         buttonPanel = new ButtonPanel();
 
-
         // 3️⃣ Створюємо логіку гри
-        gameLogic = new GameLogic(this, boardPanel, boardPanel.computerShipButtons, boardPanel.playerShipButtons);
-
+        gameLogic = new GameLogic(this, boardPanel.computerShipButtons, boardPanel.playerShipButtons);
 
         // 4️⃣ Кнопки
         startButton = buttonPanel.getStartButton();
