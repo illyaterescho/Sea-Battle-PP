@@ -15,34 +15,23 @@ import java.util.List;
 public class GameLogic {
 
     private final MainFrame mainFrame;
-
     private final ShipButton[][] computerShipButtons;
     private final ShipButton[][] playerShipButtons;
-
     private Ship[][] computerShipsLocations;
     private Ship[][] playerShipsLocations;
-
     private boolean isGameStarted;
     private boolean isPlayerTurn;
-
     private final AILogic aiLogic;
     private final UIMarkingLogic uiMarkingLogic;
 
-    public GameLogic(
-            MainFrame mainFrame,
-            ShipButton[][] computerShipButtons,
-            ShipButton[][] playerShipButtons
-    ) {
+    public GameLogic(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
         this.mainFrame = mainFrame;
-
         this.computerShipButtons = computerShipButtons;
         this.playerShipButtons = playerShipButtons;
-
         this.aiLogic = new AILogic(this, playerShipButtons);
         this.uiMarkingLogic = new UIMarkingLogic(this, computerShipButtons, playerShipButtons);
         this.isPlayerTurn = true;
         this.isGameStarted = false;
-
         resetComputerShipsLocations();
         resetPlayerShipsLocations();
     }
@@ -51,7 +40,6 @@ public class GameLogic {
         ShipPlacer placer = new ShipPlacer(new ShipValidator());
         List<Ship> placedShips = placer.placeShipsRandomly();
         setPlayerShips(placedShips);
-
         clearLeftBoardShips();
         for (Ship ship : placedShips) {
             for (int[] coord : ship.getCoordinates()) {
@@ -73,7 +61,6 @@ public class GameLogic {
         ShipPlacer placer = new ShipPlacer(new ShipValidator());
         List<Ship> placedShips = placer.placeShipsRandomly();
         setComputerShips(placedShips);
-
         clearRightBoardShips();
         for (Ship ship : placedShips) {
             for (int[] coord : ship.getCoordinates()) {
@@ -105,7 +92,6 @@ public class GameLogic {
             }
         }
     }
-
 
     public void clearRightBoardShips() {
         for (int i = 1; i <= 10; i++) {
@@ -196,14 +182,13 @@ public class GameLogic {
         }
     }
 
-
     public boolean isPlayerTurn() {
         return isPlayerTurn;
     }
 
-    // встановлення черги гравця використовуємо AILogic та PlayerLogic
     public void setPlayerTurn(boolean playerTurn) {
         isPlayerTurn = playerTurn;
+        System.out.println("Turn set to: " + (playerTurn ? "Player" : "Computer"));
     }
 
     public void processPlayerShot(int row, int col) {
@@ -213,23 +198,20 @@ public class GameLogic {
         boolean hit = ship != null;
         boolean sunk = false;
 
+        System.out.println("Player shot: row=" + row + ", col=" + col + ", hit=" + hit);
+
         if (hit) {
             sunk = markHit(row, col, ship);
-            checkGameEnd(); // додай завжди
-            if (!sunk) {
-                enableComputerButtons(); // дозвіл стріляти далі
-            }
+            checkGameEnd();
         } else {
             markMiss(row, col);
             setPlayerTurn(false);
             disableComputerButtons();
             enablePlayerButtons();
             startComputerTurn();
-            // AI починає хід
         }
 
         if (hit && !sunk) {
-            // якщо просто влучив — гравець продовжує
             enableComputerButtons();
         }
     }
@@ -237,9 +219,9 @@ public class GameLogic {
     public void startPlayerTurn() {
         setPlayerTurn(true);
         enableComputerButtons();
+        System.out.println("Player turn started");
     }
 
-    // ▶️ Старт гри
     public void startGame() {
         isPlayerTurn = true;
         setGameStarted(true);
@@ -247,8 +229,8 @@ public class GameLogic {
         disablePlayerButtons();
         aiLogic.resetAI();
         startPlayerTurn();
-
         addComputerBoardListeners();
+        System.out.println("Game started, player turn: " + isPlayerTurn);
     }
 
     private void addComputerBoardListeners() {
@@ -259,63 +241,57 @@ public class GameLogic {
                 ShipButton button = computerShipButtons[row][col];
 
                 if (button != null) {
-                    // очищення попередніх слухачів
                     for (var l : button.getActionListeners()) {
                         button.removeActionListener(l);
                     }
 
-                    // додаємо слухача
                     button.addActionListener(e -> {
                         if (button.isEnabled()) {
-                            processPlayerShot(row, col); // Гравець стріляє
-                            button.setEnabled(false); // блокуємо після кліку
+                            System.out.println("Player clicked: row=" + row + ", col=" + col);
+                            processPlayerShot(row, col);
+                            button.setEnabled(false);
                         }
                     });
+                } else {
+                    System.err.println("Button is null at computerShipButtons[" + row + "][" + col + "]");
                 }
             }
         }
     }
 
-    // ⏩ Хід комп'ютера
     public void startComputerTurn() {
         aiLogic.startComputerTurn();
     }
 
-    // отримання корабля комп'ютера за координатами використовується PlayerLogic
     public Ship getShipAt(int row, int col) {
         return computerShipsLocations[row][col];
     }
 
-    // Отримати корабель гравця за координатами
     public Ship getPlayerShipAt(int row, int col) {
         return playerShipsLocations[row][col];
     }
 
-    // ✅ Обробка попадання гравця по кораблю комп’ютера
     public boolean markHit(int row, int col, Ship ship) {
         boolean sunk = false;
         if (computerShipButtons[row][col] != null) {
-            ship.takeHit();           // зафіксували влучання
-            sunk = ship.isSunk();     // чи потоплено
-
+            ship.takeHit();
+            sunk = ship.isSunk();
             if (sunk) {
-                uiMarkingLogic.markSunkShip(ship); // показати потоплення
+                uiMarkingLogic.markSunkShip(ship);
             } else {
-                uiMarkingLogic.markHitSymbol(computerShipButtons[row][col]); // звичайне влучання
+                uiMarkingLogic.markHitSymbol(computerShipButtons[row][col]);
             }
         }
         return sunk;
     }
 
-    // ✅ Обробка попадання ШІ по кораблю гравця
     public boolean markHitPlayerBoard(int row, int col, Ship ship) {
         boolean sunk = false;
         if (playerShipButtons[row][col] != null) {
             ship.takeHit();
             sunk = ship.isSunk();
-
             if (sunk) {
-                uiMarkingLogic.markSunkShipPlayerBoard(ship); // Використовуємо UIMarkingLogic
+                uiMarkingLogic.markSunkShipPlayerBoard(ship);
             } else {
                 uiMarkingLogic.markHitSymbolPlayerBoard(playerShipButtons[row][col]);
             }
@@ -323,31 +299,26 @@ public class GameLogic {
         return sunk;
     }
 
-    // ❌ Промах гравця
     void markMiss(int row, int col) {
         if (computerShipButtons[row][col] != null) {
-            uiMarkingLogic.markMiss(row, col); // Використовуємо UIMarkingLogic
+            uiMarkingLogic.markMiss(row, col);
         }
     }
 
-    // ❌ Промах комп’ютера
     public void markMissPlayerBoard(int row, int col) {
         if (playerShipButtons[row][col] != null) {
-            uiMarkingLogic.markMissPlayerBoard(row, col); // Використовуємо UIMarkingLogic
+            uiMarkingLogic.markMissPlayerBoard(row, col);
         }
     }
 
-    // 🔄 Скидання координат кораблів комп’ютера
     public void resetComputerShipsLocations() {
         computerShipsLocations = new Ship[11][11];
     }
 
-    // 🔄 Скидання координат кораблів гравця
     public void resetPlayerShipsLocations() {
         playerShipsLocations = new Ship[11][11];
     }
 
-    // ↩️ Завантажити розміщення кораблів комп’ютера
     public void setComputerShips(List<Ship> ships) {
         resetComputerShipsLocations();
         for (Ship ship : ships) {
@@ -359,7 +330,6 @@ public class GameLogic {
         }
     }
 
-    // ↩️ Завантажити розміщення кораблів гравця
     public void setPlayerShips(List<Ship> ships) {
         resetPlayerShipsLocations();
         for (Ship ship : ships) {
@@ -371,8 +341,6 @@ public class GameLogic {
         }
     }
 
-
-    // 📉 Чи всі кораблі комп’ютера потоплено?
     private boolean computerShipsLocationsIsEmpty() {
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
@@ -384,7 +352,6 @@ public class GameLogic {
         return true;
     }
 
-    // 📉 Чи всі кораблі гравця потоплено?
     private boolean playerShipsLocationsIsEmpty() {
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
@@ -396,8 +363,6 @@ public class GameLogic {
         return true;
     }
 
-
-    // 🧠 Перевірка завершення гри
     public void checkGameEnd() {
         boolean computerSunk = computerShipsLocationsIsEmpty();
         boolean playerSunk = playerShipsLocationsIsEmpty();
@@ -409,7 +374,6 @@ public class GameLogic {
         }
     }
 
-    // 🎯 Завершення гри: показ повідомлення, скидання стану
     private void endGame(boolean playerWon) {
         JOptionPane.showMessageDialog(
                 mainFrame,
@@ -423,7 +387,6 @@ public class GameLogic {
         aiLogic.resetAI();
     }
 
-    // 🔄 Повне скидання гри
     public void resetGame() {
         resetComputerShipsLocations();
         resetPlayerShipsLocations();
@@ -431,4 +394,3 @@ public class GameLogic {
         isPlayerTurn = true;
     }
 }
-// тут баги

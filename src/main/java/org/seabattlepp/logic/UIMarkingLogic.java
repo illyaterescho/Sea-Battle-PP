@@ -1,11 +1,12 @@
 package org.seabattlepp.logic;
 
-import org.seabattlepp.gui.BoardPanel;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.ships.Ship;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UIMarkingLogic {
 
@@ -13,11 +14,7 @@ public class UIMarkingLogic {
     private final ShipButton[][] playerShipButtons;
     private final GameLogic gameLogic;
 
-    public UIMarkingLogic(
-            GameLogic gameLogic,
-            ShipButton[][] computerShipButtons,
-            ShipButton[][] playerShipButtons
-    ) {
+    public UIMarkingLogic(GameLogic gameLogic, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
         this.gameLogic = gameLogic;
         this.computerShipButtons = computerShipButtons;
         this.playerShipButtons = playerShipButtons;
@@ -113,14 +110,16 @@ public class UIMarkingLogic {
     }
 
     public void markMiss(int row, int col) {
-        if (computerShipButtons[row][col] != null) {
-            markMissSymbol(computerShipButtons[row][col]);
+        ShipButton button = computerShipButtons[row][col];
+        if (button != null && button.isEnabled()) {
+            markMissSymbol(button);
         }
     }
 
     public void markMissPlayerBoard(int row, int col) {
-        if (playerShipButtons[row][col] != null) {
-            markMissSymbolPlayerBoard(playerShipButtons[row][col]);
+        ShipButton button = playerShipButtons[row][col];
+        if (button != null && button.isEnabled()) {
+            markMissSymbolPlayerBoard(button);
         }
     }
 
@@ -161,8 +160,7 @@ public class UIMarkingLogic {
     }
 
     public void markSurroundingCellsAsMiss(Ship ship) {
-        // Use a set to avoid marking the same cell multiple times
-        java.util.Set<String> markedCells = new java.util.HashSet<>();
+        Set<String> markedCells = new HashSet<>();
 
         for (int[] coord : ship.getCoordinates()) {
             int shipRow = coord[0];
@@ -189,8 +187,7 @@ public class UIMarkingLogic {
     }
 
     public void markSurroundingCellsAsMissPlayerBoard(Ship ship) {
-        // Use a set to avoid marking the same cell multiple times
-        java.util.Set<String> markedCells = new java.util.HashSet<>();
+        Set<String> markedCells = new HashSet<>();
 
         for (int[] coord : ship.getCoordinates()) {
             int shipRow = coord[0];
@@ -217,7 +214,6 @@ public class UIMarkingLogic {
     }
 
     private boolean isValidCell(int row, int col) {
-        return row >= 0 && row < 10 && col >= 0 && col < 10;
+        return row >= 1 && row <= 10 && col >= 1 && col <= 10;
     }
 }
-// тут баги

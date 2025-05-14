@@ -9,16 +9,22 @@ import javax.swing.*;
 public class AILogic {
 
     private AIPlayer aiPlayer;
-    private final GameLogic gameLogic; // Зв'язок з GameLogic
+    private final GameLogic gameLogic;
+
     private final ShipButton[][] playerShipButtons;
 
-    public AILogic(
-            GameLogic gameLogic,
-            ShipButton[][] playerShipButtons
-    ) {
+    public AILogic(GameLogic gameLogic, ShipButton[][] playerShipButtons) {
         this.gameLogic = gameLogic;
         this.playerShipButtons = playerShipButtons;
         this.aiPlayer = new AIPlayer();
+        // Перевірка ініціалізації playerShipButtons
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                if (playerShipButtons[i][j] == null) {
+                    System.err.println("Warning: playerShipButtons[" + i + "][" + j + "] is null");
+                }
+            }
+        }
     }
 
     public void resetAI() {
@@ -27,6 +33,7 @@ public class AILogic {
 
     public void startComputerTurn() {
         if (!gameLogic.isGameStarted()) {
+            System.out.println("Game not started, skipping computer turn");
             return;
         }
         gameLogic.setPlayerTurn(false);
@@ -34,22 +41,22 @@ public class AILogic {
         gameLogic.disablePlayerButtons();
 
         int[] shotCoordinates = aiPlayer.makeTurn(playerShipButtons);
+        System.out.println("Computer shot: " + (shotCoordinates != null ? java.util.Arrays.toString(shotCoordinates) : "null"));
 
         if (shotCoordinates == null) {
+            System.out.println("No shot coordinates, returning turn to player");
             gameLogic.startPlayerTurn();
             return;
         }
 
-
-
         Timer timer = new Timer(700, e -> {
             boolean hit = processComputerShot(shotCoordinates[0], shotCoordinates[1]);
+            System.out.println("Computer shot result: hit=" + hit);
             if (!hit) {
-                // повертаємо хід гравцю
                 gameLogic.setPlayerTurn(true);
-                gameLogic.enableComputerButtons(); // дозволяємо натискати
+                gameLogic.enableComputerButtons();
             } else if (gameLogic.isGameStarted()) {
-                startComputerTurn(); // якщо влучив — продовжує
+                startComputerTurn();
             }
         });
         timer.setRepeats(false);
@@ -57,10 +64,17 @@ public class AILogic {
     }
 
     public boolean processComputerShot(int row, int col) {
-        ShipButton button = playerShipButtons[row][col];
-        if (button == null) {
+        if (!isValidCell(row, col)) {
+            System.err.println("Invalid shot coordinates: row=" + row + ", col=" + col);
             return false;
         }
+
+        ShipButton button = playerShipButtons[row][col];
+        if (button == null) {
+            System.err.println("Button is null at row=" + row + ", col=" + col);
+            return false;
+        }
+
         Ship ship = gameLogic.getPlayerShipAt(row, col);
         boolean hit = ship != null;
         boolean sunk = false;
@@ -73,11 +87,13 @@ public class AILogic {
 
         aiPlayer.processShotResult(new int[]{row, col}, hit, sunk);
 
-
         if (sunk) {
             gameLogic.checkGameEnd();
         }
         return hit;
     }
+
+    private boolean isValidCell(int row, int col) {
+        return row >= 1 && row <= 10 && col >= 1 && col <= 10;
+    }
 }
-// тут баги

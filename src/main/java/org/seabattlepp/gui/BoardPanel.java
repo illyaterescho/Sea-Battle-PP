@@ -116,7 +116,7 @@ public class BoardPanel extends JPanel {
         return panel;
     }
 
-    // Панель сітки 11x11
+    // Панель сітки 10x10
     public static JPanel getJPanel(Color backgroundColor) {
         JPanel grid = new JPanel(new GridLayout(11, 11, 15, 15)) {
             @Override
