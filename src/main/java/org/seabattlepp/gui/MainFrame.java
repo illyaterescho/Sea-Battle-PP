@@ -56,7 +56,10 @@ public class MainFrame extends JFrame {
 
         if (randomButton != null) {
             randomButton.setEnabled(false);
-            randomButton.addActionListener(e -> gameLogic.placeShipsRandomlyOnLeftBoard());
+            randomButton.addActionListener(e -> {
+                gameLogic.placeShipsRandomlyOnLeftBoard();
+                randomButton.setEnabled(false); // Деактивуємо після натискання
+            });
         }
 
         if (startButton != null) {
@@ -64,7 +67,7 @@ public class MainFrame extends JFrame {
                 if (!gameLogic.isGameStarted()) {
                     gameLogic.placeShipsRandomlyOnRightBoard();
                     if (randomButton != null) {
-                        randomButton.setEnabled(true);
+                        randomButton.setEnabled(true); // Активуємо після старту гри
                     }
                     gameLogic.startGame();
                     startButton.setEnabled(false);
@@ -76,7 +79,7 @@ public class MainFrame extends JFrame {
             resetButton.addActionListener(e -> {
                 gameLogic.resetBoards();
                 if (randomButton != null) {
-                    randomButton.setEnabled(false);
+                    randomButton.setEnabled(true); // Активуємо після скидання
                 }
                 startButton.setEnabled(true);
             });
@@ -95,6 +98,13 @@ public class MainFrame extends JFrame {
     public void disableRandomButton() {
         if (randomButton != null) {
             randomButton.setEnabled(false);
+        }
+    }
+
+    // Метод для активації кнопки "Рандом" після закінчення гри
+    public void enableRandomButton() {
+        if (randomButton != null) {
+            randomButton.setEnabled(true);
         }
     }
 }
