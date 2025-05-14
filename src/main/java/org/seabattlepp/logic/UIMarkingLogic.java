@@ -27,7 +27,9 @@ public class UIMarkingLogic {
     }
 
     public void markHitSymbolPlayerBoard(ShipButton button) {
-        button.setEnabled(false);
+        if (button.getText() == null || !button.getText().equals("⚓")) {
+            button.setEnabled(false);
+        }
         button.setOpaque(false);
         markHitUI(button);
     }
@@ -118,18 +120,12 @@ public class UIMarkingLogic {
 
     public void markMissPlayerBoard(int row, int col) {
         ShipButton button = playerShipButtons[row][col];
-        if (button != null && button.isEnabled()) {
-            markMissSymbolPlayerBoard(button);
+        if (button != null) {
+            markMissSymbol(button); // Використовуємо одну логіку для всіх промахів
         }
     }
 
     private void markMissSymbol(ShipButton button) {
-        button.setEnabled(false);
-        button.setOpaque(false);
-        markMissUI(button);
-    }
-
-    private void markMissSymbolPlayerBoard(ShipButton button) {
         button.setEnabled(false);
         button.setOpaque(false);
         markMissUI(button);
@@ -204,7 +200,7 @@ public class UIMarkingLogic {
 
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
                         if (gameLogic.getPlayerShipAt(adjacentRow, adjacentCol) == null && playerShipButtons[adjacentRow][adjacentCol] != null) {
-                            markMissSymbolPlayerBoard(playerShipButtons[adjacentRow][adjacentCol]);
+                            markMissSymbol(playerShipButtons[adjacentRow][adjacentCol]);
                             markedCells.add(cellKey);
                         }
                     }

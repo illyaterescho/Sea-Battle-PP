@@ -10,14 +10,12 @@ public class AILogic {
 
     private AIPlayer aiPlayer;
     private final GameLogic gameLogic;
-
     private final ShipButton[][] playerShipButtons;
 
     public AILogic(GameLogic gameLogic, ShipButton[][] playerShipButtons) {
         this.gameLogic = gameLogic;
         this.playerShipButtons = playerShipButtons;
         this.aiPlayer = new AIPlayer();
-        // Перевірка ініціалізації playerShipButtons
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 if (playerShipButtons[i][j] == null) {
@@ -55,8 +53,8 @@ public class AILogic {
             if (!hit) {
                 gameLogic.setPlayerTurn(true);
                 gameLogic.enableComputerButtons();
-            } else if (gameLogic.isGameStarted()) {
-                startComputerTurn();
+            } else if (gameLogic.isGameStarted() && !gameLogic.isPlayerTurn()) {
+                startComputerTurn(); // Повторний хід, якщо влучив
             }
         });
         timer.setRepeats(false);

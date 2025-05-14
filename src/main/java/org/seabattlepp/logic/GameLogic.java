@@ -23,6 +23,7 @@ public class GameLogic {
     private boolean isPlayerTurn;
     private final AILogic aiLogic;
     private final UIMarkingLogic uiMarkingLogic;
+    private int[][] playerTargetedArea;
 
     public GameLogic(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
         this.mainFrame = mainFrame;
@@ -32,6 +33,7 @@ public class GameLogic {
         this.uiMarkingLogic = new UIMarkingLogic(this, computerShipButtons, playerShipButtons);
         this.isPlayerTurn = true;
         this.isGameStarted = false;
+        this.playerTargetedArea = new int[11][11];
         resetComputerShipsLocations();
         resetPlayerShipsLocations();
     }
@@ -120,7 +122,7 @@ public class GameLogic {
 
     public void setGameStarted(boolean started) {
         isGameStarted = started;
-        if (started && !isPlayerTurn()) startComputerTurn();
+        if (started && !isPlayerTurn()) this.startComputerTurn();
     }
 
     public boolean isGameStarted() {
@@ -142,7 +144,7 @@ public class GameLogic {
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 ShipButton button = computerShipButtons[i][j];
-                if (button != null && button.getIcon() == null && button.getBackground() != Color.RED) {
+                if (button != null && button.getIcon() == null && button.getBackground() != Color.RED && !isPlayerShotAt(i, j)) {
                     button.setEnabled(true);
                 }
             }
@@ -154,7 +156,9 @@ public class GameLogic {
             for (int j = 1; j <= 10; j++) {
                 ShipButton button = playerShipButtons[i][j];
                 if (button != null && button.getIcon() == null && button.getBackground() != Color.RED) {
-                    button.setEnabled(true);
+                    if (button.getText() == null || !button.getText().equals("⚓")) {
+                        button.setEnabled(true);
+                    }
                 }
             }
         }
@@ -176,7 +180,9 @@ public class GameLogic {
             for (int j = 1; j <= 10; j++) {
                 ShipButton button = playerShipButtons[i][j];
                 if (button != null) {
-                    button.setEnabled(false);
+                    if (button.getText() == null || !button.getText().equals("⚓")) {
+                        button.setEnabled(false);
+                    }
                 }
             }
         }
@@ -194,6 +200,14 @@ public class GameLogic {
     public void processPlayerShot(int row, int col) {
         if (!isPlayerTurn) return;
 
+        // Перевірка на повторний постріл у ту саму клітинку
+        if (isPlayerShotAt(row, col)) {
+            System.out.println("Player tried to shoot at already used cell: row=" + row + ", col=" + col);
+            return;
+        }
+
+        markPlayerShot(row, col);
+
         Ship ship = getShipAt(row, col);
         boolean hit = ship != null;
         boolean sunk = false;
@@ -204,15 +218,24 @@ public class GameLogic {
             sunk = markHit(row, col, ship);
             checkGameEnd();
         } else {
+            System.out.println("Player missed, marking miss at row=" + row + ", col=" + col);
             markMiss(row, col);
             setPlayerTurn(false);
             disableComputerButtons();
             enablePlayerButtons();
-            startComputerTurn();
+            if (isGameStarted) {
+                this.startComputerTurn();
+            }
         }
 
-        if (hit && !sunk) {
-            enableComputerButtons();
+        // Деактивація кнопки після пострілу
+        ShipButton button = computerShipButtons[row][col];
+        if (button != null) {
+            button.setEnabled(false);
+        }
+
+        if (hit && !sunk && isGameStarted) {
+            enableComputerButtons(); // Залишаємо кнопки активними для повторного ходу
         }
     }
 
@@ -249,7 +272,6 @@ public class GameLogic {
                         if (button.isEnabled()) {
                             System.out.println("Player clicked: row=" + row + ", col=" + col);
                             processPlayerShot(row, col);
-                            button.setEnabled(false);
                         }
                     });
                 } else {
@@ -392,5 +414,20 @@ public class GameLogic {
         resetPlayerShipsLocations();
         aiLogic.resetAI();
         isPlayerTurn = true;
+        for (int i = 0; i <= 10; i++) {
+            for (int j = 0; j <= 10; j++) {
+                playerTargetedArea[i][j] = 0;
+            }
+        }
+    }
+
+    public boolean isPlayerShotAt(int row, int col) {
+        return playerTargetedArea[row][col] == 1;
+    }
+
+    private void markPlayerShot(int row, int col) {
+        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
+            playerTargetedArea[row][col] = 1;
+        }
     }
 }
