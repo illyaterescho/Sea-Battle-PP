@@ -1,25 +1,27 @@
-/*
 package org.seabattlepp.logic;
 
 import org.seabattlepp.gui.BoardPanel;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.ships.Ship;
+import org.seabattlepp.ships.BoardController;
+
 
 public class PlayerLogic {
 
     private final GameLogic gameLogic; // Зв'язок з GameLogic
-    private final BoardPanel boardPanel;
+    private final BoardController boardController; // 👈 Конкретна реалізація
     private final ShipButton[][] computerShipButtons;
 
-    public PlayerLogic(GameLogic gameLogic, BoardPanel boardPanel, ShipButton[][] computerShipButtons) {
+
+    public PlayerLogic(GameLogic gameLogic, BoardController boardController, ShipButton[][] computerShipButtons) {
         this.gameLogic = gameLogic;
-        this.boardPanel = boardPanel;
+        this.boardController = boardController;
         this.computerShipButtons = computerShipButtons;
     }
 
     public void startPlayerTurn() {
         gameLogic.setPlayerTurn(true);
-        boardPanel.enablePlayerButtons();
+        boardController.enablePlayerButtons();
     }
 
     public void processShot(int row, int col) {
@@ -39,4 +41,4 @@ public class PlayerLogic {
             gameLogic.startComputerTurn(); // Викликається тільки після промаху гравця
         }
     }
-}*/
+}

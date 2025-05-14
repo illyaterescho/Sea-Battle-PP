@@ -1,10 +1,10 @@
-/*
 package org.seabattlepp.logic.ai;
 
-import org.seabattlepp.gui.BoardPanel;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.logic.GameLogic;
 import org.seabattlepp.ships.Ship;
+import org.seabattlepp.ships.BoardController;
+
 
 import javax.swing.*;
 
@@ -12,12 +12,12 @@ public class AILogic {
 
     private AIPlayer aiPlayer;
     private final GameLogic gameLogic; // Зв'язок з GameLogic
-    private final BoardPanel boardPanel;
+    private final BoardController boardController; // ✅ Замість прямого доступу до BoardPanel
     private final ShipButton[][] playerShipButtons;
 
-    public AILogic(GameLogic gameLogic, BoardPanel boardPanel, ShipButton[][] playerShipButtons) {
+    public AILogic(GameLogic gameLogic, BoardController boardController, ShipButton[][] playerShipButtons) {
         this.gameLogic = gameLogic;
-        this.boardPanel = boardPanel;
+        this.boardController = boardController;
         this.playerShipButtons = playerShipButtons;
         this.aiPlayer = new AIPlayer();
     }
@@ -27,14 +27,14 @@ public class AILogic {
     }
 
     public void startComputerTurn() {
-        if (!boardPanel.isGameStarted()) {
+        if (!boardController.isGameStarted()) {
             return;
         }
         gameLogic.setPlayerTurn(false);
-        boardPanel.disableComputerButtons();
-        boardPanel.disablePlayerButtons();
+        boardController.disableComputerButtons();
+        boardController.disablePlayerButtons();
 
-        int[] shotCoordinates = aiPlayer.makeTurn(boardPanel.playerShipButtons);
+        int[] shotCoordinates = aiPlayer.makeTurn(playerShipButtons);
 
         if (shotCoordinates == null) {
             gameLogic.startPlayerTurn();
@@ -46,7 +46,7 @@ public class AILogic {
             boolean hit = processComputerShot(shotCoordinates[0], shotCoordinates[1]);
             if (!hit) {
                 gameLogic.startPlayerTurn();
-            } else if (boardPanel.isGameStarted()) {
+            } else if (boardController.isGameStarted()) {
                 startComputerTurn();
             }
         });
@@ -55,7 +55,7 @@ public class AILogic {
     }
 
     public boolean processComputerShot(int row, int col) {
-        ShipButton button = boardPanel.playerShipButtons[row][col];
+        ShipButton button = playerShipButtons[row][col];
         if (button == null) {
             return false;
         }
@@ -77,4 +77,4 @@ public class AILogic {
         }
         return hit;
     }
-}*/
+}

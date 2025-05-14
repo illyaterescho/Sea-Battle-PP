@@ -1,4 +1,3 @@
-/*
 package org.seabattlepp.logic;
 
 import org.seabattlepp.gui.BoardPanel;
@@ -7,17 +6,18 @@ import org.seabattlepp.ships.Ship;
 
 import javax.swing.*;
 import java.awt.*;
+import org.seabattlepp.ships.BoardController;
 
 public class UIMarkingLogic {
 
-    private final BoardPanel boardPanel;
+    private final BoardController boardController;
     private final ShipButton[][] computerShipButtons;
     private final ShipButton[][] playerShipButtons;
     private final GameLogic gameLogic;
 
-    public UIMarkingLogic(GameLogic gameLogic, BoardPanel boardPanel, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
+    public UIMarkingLogic(GameLogic gameLogic, BoardController boardController, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
         this.gameLogic = gameLogic;
-        this.boardPanel = boardPanel;
+        this.boardController = boardController;
         this.computerShipButtons = computerShipButtons;
         this.playerShipButtons = playerShipButtons;
     }
@@ -218,4 +218,4 @@ public class UIMarkingLogic {
     private boolean isValidCell(int row, int col) {
         return row >= 0 && row < 10 && col >= 0 && col < 10;
     }
-}*/
+}

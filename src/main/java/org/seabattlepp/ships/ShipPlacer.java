@@ -1,8 +1,6 @@
-/*
 package org.seabattlepp.ships;
 
 import java.util.*;
-import java.util.List;
 import java.util.Random;
 
 public class ShipPlacer {
@@ -13,20 +11,22 @@ public class ShipPlacer {
         this.validator = validator;
     }
 
-    public List<org.seabattlepp.ships.Ship> placeShipsRandomly() {
-        List<org.seabattlepp.ships.Ship> ships = createShipList(); // для створення списку кораблів для розміщення
-        List<org.seabattlepp.ships.Ship> placedShips = new ArrayList<>();
+    // Основний метод, який розміщує кораблі випадковим чином
+    public List<Ship> placeShipsRandomly() {
+        List<Ship> ships = createShipList(); // для створення списку кораблів для розміщення
+        List<Ship> placedShips = new ArrayList<>();
         Set<String> occupiedCoordinates = new HashSet<>(); // для зайнятих координат
 
-        for (org.seabattlepp.ships.Ship ship : ships) {
+        for (Ship ship : ships) {
             boolean placed = false;
             while (!placed) {
                 int startRow = random.nextInt(10) + 1; // рядки від 1 до 10
                 int startCol = random.nextInt(10) + 1; // стовпці від 1 до 10
-                boolean isHorizontal = random.nextBoolean(); // рандом
+                boolean isHorizontal = random.nextBoolean();
 
                 List<int[]> potentialCoordinates = generateCoordinates(ship, startRow, startCol, isHorizontal);
 
+                // перевірка на валідність розміщення корабля
                 if (validator.isValidPlacement(potentialCoordinates, occupiedCoordinates)) {
                     ship.setCoordinates(potentialCoordinates);
                     placedShips.add(ship);
@@ -38,33 +38,38 @@ public class ShipPlacer {
         return placedShips;
     }
 
-    private List<org.seabattlepp.ships.Ship> createShipList() {
+    private List<Ship> createShipList() {
         List<org.seabattlepp.ships.Ship> ships = new ArrayList<>();
-        ships.add(new org.seabattlepp.ships.Ship("Авіаносець", 5));
-        ships.add(new org.seabattlepp.ships.Ship("Броненосець", 4));
-        ships.add(new org.seabattlepp.ships.Ship("Броненосець", 4));
-        ships.add(new org.seabattlepp.ships.Ship("Крейсер", 3));
-        ships.add(new org.seabattlepp.ships.Ship("Крейсер", 3));
-        ships.add(new org.seabattlepp.ships.Ship("Крейсер", 3));
-        ships.add(new org.seabattlepp.ships.Ship("Руйнівник", 2));
-        ships.add(new org.seabattlepp.ships.Ship("Руйнівник", 2));
-        ships.add(new org.seabattlepp.ships.Ship("Руйнівник", 2));
-        ships.add(new org.seabattlepp.ships.Ship("Руйнівник", 2));
+
+        ships.add(new Ship("Авіаносець", 5));
+        ships.add(new Ship("Броненосець", 4));
+        ships.add(new Ship("Броненосець", 4));
+        ships.add(new Ship("Крейсер", 3));
+        ships.add(new Ship("Крейсер", 3));
+        ships.add(new Ship("Крейсер", 3));
+        ships.add(new Ship("Руйнівник", 2));
+        ships.add(new Ship("Руйнівник", 2));
+        ships.add(new Ship("Руйнівник", 2));
+        ships.add(new Ship("Руйнівник", 2));
+
         return ships;
     }
 
 
-    private List<int[]> generateCoordinates(org.seabattlepp.ships.Ship ship, int startRow, int startCol, boolean isHorizontal) {
+    // генерує координати корбля залежно від орієнтації
+    private List<int[]> generateCoordinates(Ship ship, int startRow, int startCol, boolean isHorizontal) {
         List<int[]> coordinates = new ArrayList<>();
         if (isHorizontal) {
-            if (startCol + ship.getLength() > 11) { // перевірка виходу за межі дошки
-                startCol = 11 - ship.getLength(); // зсув вліво якщо виходить за межі
+            // Якщо виходить за межі праворуч — зсуваємо вліво
+            if (startCol + ship.getLength() > 11) {
+                startCol = 11 - ship.getLength();
             }
             for (int i = 0; i < ship.getLength(); i++) {
                 coordinates.add(new int[]{startRow, startCol + i});
             }
         } else { // Вертикальне розташування
-            if (startRow + ship.getLength() > 11) { // перевірка чи виходить корабель за межі дошки
+            // Якщо виходить за межі вниз — зсуваємо вгору
+            if (startRow + ship.getLength() > 11) {
                 startRow = 11 - ship.getLength(); // зсув вгору якщо виходить за межі
             }
             for (int i = 0; i < ship.getLength(); i++) {
@@ -74,6 +79,7 @@ public class ShipPlacer {
         return coordinates;
     }
 
+    // Конвертує список координат у множину рядків "row,col" для перевірки зайнятості
     private Set<String> coordinatesToStringSet(List<int[]> coordinatesList) {
         Set<String> coordinateStrings = new HashSet<>();
         for (int[] coord : coordinatesList) {
@@ -81,4 +87,4 @@ public class ShipPlacer {
         }
         return coordinateStrings;
     }
-}*/
+}

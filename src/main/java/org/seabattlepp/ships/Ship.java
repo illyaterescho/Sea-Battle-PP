@@ -1,4 +1,3 @@
-/*
 package org.seabattlepp.ships;
 
 import java.util.List;
@@ -23,6 +22,7 @@ public class Ship {
         return length;
     }
 
+    // Повертає список координат, які займає корабель
     public List<int[]> getCoordinates() {
         return coordinates;
     }
@@ -44,4 +44,4 @@ public class Ship {
     public boolean isSunk() {
         return hitsTaken >= length;
     }
-}*/
+}
