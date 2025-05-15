@@ -21,9 +21,11 @@ public class GameLogic {
     private Ship[][] playerShipsLocations;
     private boolean isGameStarted;
     private boolean isPlayerTurn;
+    private boolean isRandomButtonPressed;
     private final AILogic aiLogic;
     private final UIMarkingLogic uiMarkingLogic;
     private int[][] playerTargetedArea;
+    private int[][] computerTargetedArea;
 
     public GameLogic(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
         this.mainFrame = mainFrame;
@@ -33,7 +35,9 @@ public class GameLogic {
         this.uiMarkingLogic = new UIMarkingLogic(this, computerShipButtons, playerShipButtons);
         this.isPlayerTurn = true;
         this.isGameStarted = false;
+        this.isRandomButtonPressed = false;
         this.playerTargetedArea = new int[11][11];
+        this.computerTargetedArea = new int[11][11];
         resetComputerShipsLocations();
         resetPlayerShipsLocations();
     }
@@ -115,6 +119,7 @@ public class GameLogic {
         clearLeftBoardShips();
         clearRightBoardShips();
         isGameStarted = false;
+        isRandomButtonPressed = false;
         resetGame();
         enablePlayerButtonsForPlacement();
         disableComputerButtons();
@@ -122,7 +127,9 @@ public class GameLogic {
 
     public void setGameStarted(boolean started) {
         isGameStarted = started;
-        if (started && !isPlayerTurn()) this.startComputerTurn();
+        if (started && !isPlayerTurn()) {
+            this.startComputerTurn();
+        }
     }
 
     public boolean isGameStarted() {
@@ -145,7 +152,11 @@ public class GameLogic {
             for (int j = 1; j <= 10; j++) {
                 ShipButton button = computerShipButtons[i][j];
                 if (button != null && button.getIcon() == null && button.getBackground() != Color.RED && !isPlayerShotAt(i, j)) {
-                    button.setEnabled(true);
+                    if (isRandomButtonPressed) {
+                        button.setEnabled(true);
+                    } else {
+                        button.setEnabled(false);
+                    }
                 }
             }
         }
@@ -200,7 +211,11 @@ public class GameLogic {
     public void processPlayerShot(int row, int col) {
         if (!isPlayerTurn) return;
 
-        // Перевірка на повторний постріл у ту саму клітинку
+        if (!isRandomButtonPressed) {
+            System.out.println("Player tried to shoot before pressing Random button: row=" + row + ", col=" + col);
+            return;
+        }
+
         if (isPlayerShotAt(row, col)) {
             System.out.println("Player tried to shoot at already used cell: row=" + row + ", col=" + col);
             return;
@@ -228,14 +243,13 @@ public class GameLogic {
             }
         }
 
-        // Деактивація кнопки після пострілу
         ShipButton button = computerShipButtons[row][col];
         if (button != null) {
             button.setEnabled(false);
         }
 
         if (hit && !sunk && isGameStarted) {
-            enableComputerButtons(); // Залишаємо кнопки активними для повторного ходу
+            enableComputerButtons();
         }
     }
 
@@ -248,7 +262,7 @@ public class GameLogic {
     public void startGame() {
         isPlayerTurn = true;
         setGameStarted(true);
-        enableComputerButtons();
+        disableComputerButtons();
         disablePlayerButtons();
         aiLogic.resetAI();
         startPlayerTurn();
@@ -308,17 +322,48 @@ public class GameLogic {
     }
 
     public boolean markHitPlayerBoard(int row, int col, Ship ship) {
+        if (!isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
+            System.out.println("Computer tried to shoot at already used cell: row=" + row + ", col=" + col);
+            return false;
+        }
+
+        markComputerShot(row, col);
+
         boolean sunk = false;
         if (playerShipButtons[row][col] != null) {
             ship.takeHit();
             sunk = ship.isSunk();
             if (sunk) {
                 uiMarkingLogic.markSunkShipPlayerBoard(ship);
+                markSurroundingCellsAsShot(ship);
+                checkGameEnd();
             } else {
                 uiMarkingLogic.markHitSymbolPlayerBoard(playerShipButtons[row][col]);
             }
         }
         return sunk;
+    }
+
+    private void markSurroundingCellsAsShot(Ship ship) {
+        for (int[] coord : ship.getCoordinates()) {
+            int row = coord[0];
+            int col = coord[1];
+            // Перевіряємо всі сусідні клітинки (включаючи діагоналі)
+            for (int dr = -1; dr <= 1; dr++) {
+                for (int dc = -1; dc <= 1; dc++) {
+                    int newRow = row + dr;
+                    int newCol = col + dc;
+                    if (isValidCell(newRow, newCol) && !isComputerShotAt(newRow, newCol)) {
+                        markComputerShot(newRow, newCol);
+                        System.out.println("Marked surrounding cell as shot in computerTargetedArea: row=" + newRow + ", col=" + newCol);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isValidCell(int row, int col) {
+        return row >= 1 && row <= 10 && col >= 1 && col <= 10;
     }
 
     void markMiss(int row, int col) {
@@ -328,6 +373,13 @@ public class GameLogic {
     }
 
     public void markMissPlayerBoard(int row, int col) {
+        if (!isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
+            System.out.println("Computer tried to shoot at already used cell: row=" + row + ", col=" + col);
+            return;
+        }
+
+        markComputerShot(row, col);
+
         if (playerShipButtons[row][col] != null) {
             uiMarkingLogic.markMissPlayerBoard(row, col);
         }
@@ -414,9 +466,11 @@ public class GameLogic {
         resetPlayerShipsLocations();
         aiLogic.resetAI();
         isPlayerTurn = true;
+        isRandomButtonPressed = false;
         for (int i = 0; i <= 10; i++) {
             for (int j = 0; j <= 10; j++) {
                 playerTargetedArea[i][j] = 0;
+                computerTargetedArea[i][j] = 0;
             }
         }
     }
@@ -429,5 +483,35 @@ public class GameLogic {
         if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
             playerTargetedArea[row][col] = 1;
         }
+    }
+
+    public boolean isComputerShotAt(int row, int col) {
+        return computerTargetedArea[row][col] == 1;
+    }
+
+    public void markComputerShot(int row, int col) {
+        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
+            computerTargetedArea[row][col] = 1;
+        }
+    }
+
+    public void enableShootingAfterRandom() {
+        isRandomButtonPressed = true;
+        System.out.println("Shooting enabled after Random button press");
+        enableComputerButtons();
+    }
+
+    public boolean isCellAvailableForShot(int row, int col) {
+        ShipButton button = playerShipButtons[row][col];
+        if (button != null) {
+            String text = button.getText();
+            // Забороняємо стріляти в клітинки з символом "•"
+            if ("•".equals(text)) {
+                return false;
+            }
+            // Дозволяємо стріляти, якщо немає іконки
+            return button.getIcon() == null;
+        }
+        return false;
     }
 }

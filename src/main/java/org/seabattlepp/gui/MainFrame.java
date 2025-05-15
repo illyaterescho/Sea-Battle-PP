@@ -58,7 +58,9 @@ public class MainFrame extends JFrame {
             randomButton.setEnabled(false);
             randomButton.addActionListener(e -> {
                 gameLogic.placeShipsRandomlyOnLeftBoard();
+                gameLogic.enableShootingAfterRandom(); // Активуємо стрільбу після натискання "Рандом"
                 randomButton.setEnabled(false); // Деактивуємо після натискання
+                System.out.println("Random button clicked: ships placed and shooting enabled");
             });
         }
 
@@ -98,13 +100,6 @@ public class MainFrame extends JFrame {
     public void disableRandomButton() {
         if (randomButton != null) {
             randomButton.setEnabled(false);
-        }
-    }
-
-    // Метод для активації кнопки "Рандом" після закінчення гри
-    public void enableRandomButton() {
-        if (randomButton != null) {
-            randomButton.setEnabled(true);
         }
     }
 }

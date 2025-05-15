@@ -121,7 +121,7 @@ public class UIMarkingLogic {
     public void markMissPlayerBoard(int row, int col) {
         ShipButton button = playerShipButtons[row][col];
         if (button != null) {
-            markMissSymbol(button); // Використовуємо одну логіку для всіх промахів
+            markMissSymbol(button);
         }
     }
 
@@ -143,7 +143,7 @@ public class UIMarkingLogic {
                 g2d.setColor(Color.BLACK);
                 g2d.setFont(new Font("Inter", Font.BOLD, 70));
                 FontMetrics fm = g2d.getFontMetrics();
-                String text = "•";
+                String text = "•"; // Символ "•" використовується для промахів і обводки
                 int textWidth = fm.stringWidth(text);
                 int x = (c.getWidth() - textWidth) / 2;
 
@@ -200,6 +200,7 @@ public class UIMarkingLogic {
 
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
                         if (gameLogic.getPlayerShipAt(adjacentRow, adjacentCol) == null && playerShipButtons[adjacentRow][adjacentCol] != null) {
+                            // Додаємо обводку з символом "•" навколо потопленого корабля гравця
                             markMissSymbol(playerShipButtons[adjacentRow][adjacentCol]);
                             markedCells.add(cellKey);
                         }

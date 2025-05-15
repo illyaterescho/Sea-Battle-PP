@@ -1,12 +1,13 @@
 package org.seabattlepp.logic.ai;
 
 import org.seabattlepp.gui.ShipButton;
+import org.seabattlepp.logic.GameLogic;
 
 public class AIPlayer {
 
     private final AIStrategy aiStrategy;
 
-    public AIPlayer() {
+    public AIPlayer(GameLogic gameLogic) {
         this.aiStrategy = new AIStrategy();
     }
 
