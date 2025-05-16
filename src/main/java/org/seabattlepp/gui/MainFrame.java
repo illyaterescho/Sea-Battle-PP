@@ -24,7 +24,7 @@ public class MainFrame extends JFrame {
 
         // 🖼 Спроба завантажити іконку гри
         try {
-            Image image = Toolkit.getDefaultToolkit().getImage("src/main/java/org/seabattlepp/img/icon.png");
+            Image image = Toolkit.getDefaultToolkit().getImage("src/main/java/org/seabattlepp/gui/img/icon.png");
             setIconImage(image);
         } catch (Exception e) {
             System.err.println("помилка завантаження іконки: " + e.getMessage());
@@ -73,7 +73,8 @@ public class MainFrame extends JFrame {
             randomButton.setEnabled(false); // Деактивована до початку гри
             randomButton.addActionListener(e -> {
                 gameLogic.placeShipsRandomlyOnLeftBoard();
-                gameLogic.enableShootingAfterRandom(); // Активуємо стрільбу після натискання "Рандом"
+                gameLogic.enableShootingAfterRandom();
+                randomButton.setEnabled(true);
                 System.out.println("Random button clicked: ships placed and shooting enabled");
             });
         }
@@ -81,7 +82,7 @@ public class MainFrame extends JFrame {
         // ▶️ Налаштування кнопки "Старт"
         if (startButton != null) {
             startButton.addActionListener(e -> {
-                if (!gameLogic.isGameStarted()) {
+                if (!gameLogic.isGameStarted) {
                     gameLogic.placeShipsRandomlyOnRightBoard(); // Комп'ютер розставляє кораблі
                     if (randomButton != null) {
                         randomButton.setEnabled(true);  // Активуємо "Рандом" для гравця
@@ -104,7 +105,7 @@ public class MainFrame extends JFrame {
         }
 
         // 🔒 Додатково деактивуємо "Рандом", якщо гра ще не почалась
-        if (!gameLogic.isGameStarted()) {
+        if (!gameLogic.isGameStarted) {
             randomButton.setEnabled(false);
         }
     }

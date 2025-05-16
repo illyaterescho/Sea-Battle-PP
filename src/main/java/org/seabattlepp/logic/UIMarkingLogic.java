@@ -172,7 +172,7 @@ public class UIMarkingLogic {
                     String cellKey = adjacentRow + "," + adjacentCol;
 
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
-                        if (gameLogic.getShipAt(adjacentRow, adjacentCol) == null && computerShipButtons[adjacentRow][adjacentCol] != null) {
+                        if (gameLogic.computerShipsLocations[adjacentRow][adjacentCol] == null && computerShipButtons[adjacentRow][adjacentCol] != null) {
                             markMissSymbol(computerShipButtons[adjacentRow][adjacentCol]);
                             markedCells.add(cellKey);
                         }
@@ -199,7 +199,7 @@ public class UIMarkingLogic {
                     String cellKey = adjacentRow + "," + adjacentCol;
 
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
-                        if (gameLogic.getPlayerShipAt(adjacentRow, adjacentCol) == null && playerShipButtons[adjacentRow][adjacentCol] != null) {
+                        if (gameLogic.playerShipsLocations[adjacentRow][adjacentCol] == null && playerShipButtons[adjacentRow][adjacentCol] != null) {
                             // Додаємо обводку з символом "•" навколо потопленого корабля гравця
                             markMissSymbol(playerShipButtons[adjacentRow][adjacentCol]);
                             markedCells.add(cellKey);

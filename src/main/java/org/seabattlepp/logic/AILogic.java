@@ -1,7 +1,6 @@
-package org.seabattlepp.logic.ai;
+package org.seabattlepp.logic;
 
 import org.seabattlepp.gui.ShipButton;
-import org.seabattlepp.logic.GameLogic;
 import org.seabattlepp.ships.Ship;
 
 import javax.swing.*;
@@ -35,7 +34,7 @@ public class AILogic {
     }
 
     public void startComputerTurn() {
-        if (!gameLogic.isGameStarted() || gameLogic.isGameEnded()) {
+        if (!gameLogic.isGameStarted || gameLogic.isGameEnded) {
             System.out.println("Game not started or ended, skipping computer turn at " + new java.util.Date());
             return;
         }
@@ -61,10 +60,10 @@ public class AILogic {
         timer = new Timer(1000, e -> {
             boolean hit = processComputerShot(shotCoordinates[0], shotCoordinates[1]);
             System.out.println("Computer shot result: hit=" + hit + " at " + new java.util.Date());
-            if (!hit && !gameLogic.isGameEnded()) {
+            if (!hit && !gameLogic.isGameEnded) {
                 gameLogic.setPlayerTurn(true);
                 gameLogic.enableComputerButtons();
-            } else if (hit && gameLogic.isGameStarted() && !gameLogic.isGameEnded() && !gameLogic.isPlayerTurn()) {
+            } else if (hit && gameLogic.isGameStarted && !gameLogic.isGameEnded && !gameLogic.isPlayerTurn) {
                 startComputerTurn(); // Продовжуємо хід лише якщо гра триває
             }
         });
@@ -119,7 +118,7 @@ public class AILogic {
             return false;
         }
 
-        if (gameLogic.isGameEnded()) {
+        if (gameLogic.isGameEnded) {
             System.out.println("Game already ended, skipping shot at row=" + row + ", col=" + col + " at " + new java.util.Date());
             if (timer != null) {
                 timer.stop();
@@ -137,13 +136,13 @@ public class AILogic {
         // Додаткова перевірка перед пострілом
         if (!gameLogic.isCellAvailableForShot(row, col) || gameLogic.isComputerShotAt(row, col)) {
             System.out.println("Computer tried to shoot at already used cell in processComputerShot: row=" + row + ", col=" + col + ". Retrying... at " + new java.util.Date());
-            if (!gameLogic.isGameEnded()) {
+            if (!gameLogic.isGameEnded) {
                 startComputerTurn(); // Повторна спроба лише якщо гра не закінчена
             }
             return false;
         }
 
-        Ship ship = gameLogic.getPlayerShipAt(row, col);
+        Ship ship = gameLogic.playerShipsLocations[row][col];
         boolean hit = ship != null;
         boolean sunk = false;
 
@@ -155,7 +154,7 @@ public class AILogic {
 
         aiStrategy.processShotResult(new int[]{row, col}, hit, sunk);
 
-        if (sunk && !gameLogic.isGameEnded()) {
+        if (sunk && !gameLogic.isGameEnded) {
             System.out.println("Checking game end after sunk ship at row=" + row + ", col=" + col + " at " + new java.util.Date());
             gameLogic.checkGameEnd();
         }

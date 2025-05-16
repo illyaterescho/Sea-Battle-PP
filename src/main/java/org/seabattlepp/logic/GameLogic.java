@@ -1,33 +1,34 @@
 package org.seabattlepp.logic;
 
-import org.seabattlepp.logic.ai.AILogic;
+import javax.swing.*;
+import javax.swing.plaf.basic.BasicButtonUI;
+import java.awt.*;
+import java.util.List;
+
 import org.seabattlepp.ships.Ship;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.gui.MainFrame;
 import org.seabattlepp.ships.ShipPlacer;
 import org.seabattlepp.ships.ShipValidator;
 
-import javax.swing.*;
-import javax.swing.plaf.basic.BasicButtonUI;
-import java.awt.*;
-import java.io.File;
-import java.util.List;
 
 public class GameLogic {
 
     private final MainFrame mainFrame;
+    // Двовимірні масиви кнопок, що представляють ігрові поля для кораблів комп'ютера та гравця.
     private final ShipButton[][] computerShipButtons;
     private final ShipButton[][] playerShipButtons;
-    private Ship[][] computerShipsLocations;
-    private Ship[][] playerShipsLocations;
-    private boolean isGameStarted;
-    private boolean isPlayerTurn;
+    // Двовимірні масиви для зберігання об'єктів кораблів, що відстежують їх позиції на полях.
+    public Ship[][] computerShipsLocations;
+    public Ship[][] playerShipsLocations;
+    public boolean isGameStarted;
+    public boolean isPlayerTurn;
     private boolean isRandomButtonPressed;
     private final AILogic aiLogic;
     private final UIMarkingLogic uiMarkingLogic;
-    private int[][] playerTargetedArea;
-    private int[][] computerTargetedArea;
-    private boolean isGameEnded; // Прапорець для контролю закінчення гри
+    private final int[][] playerTargetedArea;
+    private final int[][] computerTargetedArea;
+    public boolean isGameEnded; // Прапорець для контролю закінчення гри
 
     public GameLogic(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
         this.mainFrame = mainFrame;
@@ -38,29 +39,37 @@ public class GameLogic {
         this.isPlayerTurn = true;
         this.isGameStarted = false;
         this.isRandomButtonPressed = false;
-        this.isGameEnded = false; // Ініціалізація прапорця
+        this.isGameEnded = false;
         this.playerTargetedArea = new int[11][11];
         this.computerTargetedArea = new int[11][11];
         resetComputerShipsLocations();
         resetPlayerShipsLocations();
     }
 
+    // Розміщує кораблі випадковим чином на лівому полі (гравця).
     public void placeShipsRandomlyOnLeftBoard() {
         ShipPlacer placer = new ShipPlacer(new ShipValidator());
         List<Ship> placedShips = placer.placeShipsRandomly();
-        setPlayerShips(placedShips);
+        resetPlayerShipsLocations();
+        for (Ship ship : placedShips) {
+            for (int[] coord : ship.getCoordinates()) {
+                int row = coord[0];
+                int col = coord[1];
+                playerShipsLocations[row][col] = ship;
+            }
+        }
         clearLeftBoardShips();
         for (Ship ship : placedShips) {
             for (int[] coord : ship.getCoordinates()) {
                 int row = coord[0], col = coord[1];
-                ShipButton btn = playerShipButtons[row][col];
-                if (btn != null) {
-                    btn.setText("⚓");
-                    btn.setFont(new Font("Inter", Font.BOLD, 50));
-                    btn.setForeground(Color.BLACK);
-                    btn.setBackground(Color.WHITE);
-                    btn.setEnabled(true);
-                    btn.setIcon(null);
+                ShipButton button = playerShipButtons[row][col];
+                if (button != null) {
+                    button.setText("⚓");
+                    button.setFont(new Font("Inter", Font.BOLD, 50));
+                    button.setForeground(Color.BLACK);
+                    button.setBackground(Color.WHITE);
+                    button.setEnabled(true);
+                    button.setIcon(null);
                 }
             }
         }
@@ -69,7 +78,14 @@ public class GameLogic {
     public void placeShipsRandomlyOnRightBoard() {
         ShipPlacer placer = new ShipPlacer(new ShipValidator());
         List<Ship> placedShips = placer.placeShipsRandomly();
-        setComputerShips(placedShips);
+        resetComputerShipsLocations();
+        for (Ship ship : placedShips) {
+            for (int[] coord : ship.getCoordinates()) {
+                int row = coord[0];
+                int col = coord[1];
+                computerShipsLocations[row][col] = ship;
+            }
+        }
         clearRightBoardShips();
         for (Ship ship : placedShips) {
             for (int[] coord : ship.getCoordinates()) {
@@ -85,6 +101,7 @@ public class GameLogic {
             }
         }
     }
+
 
     public void clearLeftBoardShips() {
         for (int i = 1; i <= 10; i++) {
@@ -123,22 +140,21 @@ public class GameLogic {
         clearRightBoardShips();
         isGameStarted = false;
         isRandomButtonPressed = false;
-        // Не скидаємо isGameEnded тут, щоб уникнути повторного виклику endGame
-        resetGame();
+        resetComputerShipsLocations();
+        resetPlayerShipsLocations();
+        aiLogic.resetAI();
+        isPlayerTurn = true;
+        isRandomButtonPressed = false;
+        for (int i = 0; i <= 10; i++) {
+            for (int j = 0; j <= 10; j++) {
+                playerTargetedArea[i][j] = 0;
+                computerTargetedArea[i][j] = 0;
+            }
+        }
         enablePlayerButtonsForPlacement();
         disableComputerButtons();
     }
 
-    public void setGameStarted(boolean started) {
-        isGameStarted = started;
-        if (started && !isPlayerTurn() && !isGameEnded) {
-            this.startComputerTurn();
-        }
-    }
-
-    public boolean isGameStarted() {
-        return isGameStarted;
-    }
 
     public void enablePlayerButtonsForPlacement() {
         for (int i = 1; i <= 10; i++) {
@@ -203,9 +219,6 @@ public class GameLogic {
         }
     }
 
-    public boolean isPlayerTurn() {
-        return isPlayerTurn;
-    }
 
     public void setPlayerTurn(boolean playerTurn) {
         isPlayerTurn = playerTurn;
@@ -225,9 +238,11 @@ public class GameLogic {
             return;
         }
 
-        markPlayerShot(row, col);
+        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
+            playerTargetedArea[row][col] = 1;
+        }
 
-        Ship ship = getShipAt(row, col);
+        Ship ship = computerShipsLocations[row][col];
         boolean hit = ship != null;
         boolean sunk = false;
 
@@ -238,7 +253,9 @@ public class GameLogic {
             checkGameEnd();
         } else {
             System.out.println("Player missed, marking miss at row=" + row + ", col=" + col);
-            markMiss(row, col);
+            if (computerShipButtons[row][col] != null) {
+                uiMarkingLogic.markMiss(row, col);
+            }
             setPlayerTurn(false);
             disableComputerButtons();
             enablePlayerButtons();
@@ -274,11 +291,6 @@ public class GameLogic {
         disablePlayerButtons();
         aiLogic.resetAI();
         startPlayerTurn();
-        addComputerBoardListeners();
-        System.out.println("Game started, player turn: " + isPlayerTurn);
-    }
-
-    private void addComputerBoardListeners() {
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 int row = i;
@@ -301,6 +313,14 @@ public class GameLogic {
                 }
             }
         }
+        System.out.println("Game started, player turn: " + isPlayerTurn);
+    }
+
+    public void setGameStarted(boolean started) {
+        isGameStarted = started;
+        if (started && !this.isPlayerTurn && !isGameEnded) {
+            this.startComputerTurn();
+        }
     }
 
     public void startComputerTurn() {
@@ -308,13 +328,6 @@ public class GameLogic {
         aiLogic.startComputerTurn();
     }
 
-    public Ship getShipAt(int row, int col) {
-        return computerShipsLocations[row][col];
-    }
-
-    public Ship getPlayerShipAt(int row, int col) {
-        return playerShipsLocations[row][col];
-    }
 
     public boolean markHit(int row, int col, Ship ship) {
         boolean sunk = false;
@@ -344,7 +357,20 @@ public class GameLogic {
             sunk = ship.isSunk();
             if (sunk) {
                 uiMarkingLogic.markSunkShipPlayerBoard(ship);
-                markSurroundingCellsAsShot(ship);
+                for (int[] coord : ship.getCoordinates()) {
+                    int r = coord[0];
+                    int c = coord[1];
+                    for (int dr = -1; dr <= 1; dr++) {
+                        for (int dc = -1; dc <= 1; dc++) {
+                            int newRow = r + dr;
+                            int newCol = c + dc;
+                            if (newRow >= 1 && newRow <= 10 && newCol >= 1 && newCol <= 10 && !isComputerShotAt(newRow, newCol)) {
+                                markComputerShot(newRow, newCol);
+                                System.out.println("Marked surrounding cell as shot in computerTargetedArea: row=" + newRow + ", col=" + newCol);
+                            }
+                        }
+                    }
+                }
                 checkGameEnd();
                 if (isGameEnded) {
                     aiLogic.stopAI(); // Зупиняємо AI після завершення гри
@@ -356,32 +382,7 @@ public class GameLogic {
         return sunk;
     }
 
-    private void markSurroundingCellsAsShot(Ship ship) {
-        for (int[] coord : ship.getCoordinates()) {
-            int row = coord[0];
-            int col = coord[1];
-            for (int dr = -1; dr <= 1; dr++) {
-                for (int dc = -1; dc <= 1; dc++) {
-                    int newRow = row + dr;
-                    int newCol = col + dc;
-                    if (isValidCell(newRow, newCol) && !isComputerShotAt(newRow, newCol)) {
-                        markComputerShot(newRow, newCol);
-                        System.out.println("Marked surrounding cell as shot in computerTargetedArea: row=" + newRow + ", col=" + newCol);
-                    }
-                }
-            }
-        }
-    }
 
-    private boolean isValidCell(int row, int col) {
-        return row >= 1 && row <= 10 && col >= 1 && col <= 10;
-    }
-
-    void markMiss(int row, int col) {
-        if (computerShipButtons[row][col] != null) {
-            uiMarkingLogic.markMiss(row, col);
-        }
-    }
 
     public void markMissPlayerBoard(int row, int col) {
         if (isGameEnded || !isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
@@ -404,62 +405,39 @@ public class GameLogic {
         playerShipsLocations = new Ship[11][11];
     }
 
-    public void setComputerShips(List<Ship> ships) {
-        resetComputerShipsLocations();
-        for (Ship ship : ships) {
-            for (int[] coord : ship.getCoordinates()) {
-                int row = coord[0];
-                int col = coord[1];
-                computerShipsLocations[row][col] = ship;
-            }
-        }
-    }
-
-    public void setPlayerShips(List<Ship> ships) {
-        resetPlayerShipsLocations();
-        for (Ship ship : ships) {
-            for (int[] coord : ship.getCoordinates()) {
-                int row = coord[0];
-                int col = coord[1];
-                playerShipsLocations[row][col] = ship;
-            }
-        }
-    }
-
-    private boolean computerShipsLocationsIsEmpty() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                if (computerShipsLocations[i][j] != null && !computerShipsLocations[i][j].isSunk()) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private boolean playerShipsLocationsIsEmpty() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                if (playerShipsLocations[i][j] != null && !playerShipsLocations[i][j].isSunk()) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
     public void checkGameEnd() {
         if (isGameEnded) return;
 
-        boolean playerSunk = playerShipsLocationsIsEmpty();
+        // Перевіряємо, чи всі кораблі гравця потоплені
+        boolean playerSunk = true; // Припускаємо, що всі потоплені
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                if (playerShipsLocations[i][j] != null && !playerShipsLocations[i][j].isSunk()) {
+                    playerSunk = false; // Знайдено непотоплений корабель
+                    break; // Виходимо з внутрішнього циклу
+                }
+            }
+            if (!playerSunk) break; // Виходимо з зовнішнього циклу
+        }
         if (playerSunk) {
-            endGame(false);
+            endGame(false); // Комп'ютер переміг
             return;
         }
 
-        boolean computerSunk = computerShipsLocationsIsEmpty();
+        // Перевіряємо, чи всі кораблі комп'ютера потоплені
+        boolean computerSunk = true; // Припускаємо, що всі потоплені
+        for (int i = 1; i <= 10; i++) {
+            for (int j = 1; j <= 10; j++) {
+                if (computerShipsLocations[i][j] != null && !computerShipsLocations[i][j].isSunk()) {
+                    computerSunk = false; // Знайдено непотоплений корабель
+                    break; // Виходимо з внутрішнього циклу
+                }
+            }
+            if (!computerSunk) break; // Виходимо з зовнішнього циклу
+        }
         if (computerSunk) {
-            endGame(true);
+            endGame(true); // Гравець переміг
         }
     }
 
@@ -568,45 +546,8 @@ public class GameLogic {
         }
     }
 
-    // Метод для отримання кастомного шрифту (залишив для сумісності, хоча більше не використовується в endGame)
-    private Font getCustomFont() {
-        try {
-            // Спроба завантажити шрифт із файлу (замініть шлях на реальний)
-            File fontFile = new File("src/main/resources/fonts/PiratesBay.ttf"); // Приклад шляху
-            Font customFont = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(Font.BOLD, 16);
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(customFont);
-            return customFont;
-        } catch (Exception e) {
-            // Якщо шрифт не знайдено, використовуємо доступний системний шрифт
-            System.err.println("Custom font not found, using Old English Text MT or default");
-            return new Font("Old English Text MT", Font.BOLD, 16);
-        }
-    }
-
-    public void resetGame() {
-        resetComputerShipsLocations();
-        resetPlayerShipsLocations();
-        aiLogic.resetAI();
-        isPlayerTurn = true;
-        isRandomButtonPressed = false;
-        // Не скидаємо isGameEnded тут
-        for (int i = 0; i <= 10; i++) {
-            for (int j = 0; j <= 10; j++) {
-                playerTargetedArea[i][j] = 0;
-                computerTargetedArea[i][j] = 0;
-            }
-        }
-    }
-
     public boolean isPlayerShotAt(int row, int col) {
         return playerTargetedArea[row][col] == 1;
-    }
-
-    private void markPlayerShot(int row, int col) {
-        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
-            playerTargetedArea[row][col] = 1;
-        }
     }
 
     public boolean isComputerShotAt(int row, int col) {
@@ -635,9 +576,5 @@ public class GameLogic {
             return button.getIcon() == null;
         }
         return false;
-    }
-
-    public boolean isGameEnded() {
-        return isGameEnded;
     }
 }

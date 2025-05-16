@@ -1,7 +1,6 @@
-package org.seabattlepp.logic.ai;
+package org.seabattlepp.logic;
 
 import org.seabattlepp.gui.ShipButton;
-import org.seabattlepp.logic.GameLogic;
 
 import java.util.ArrayList;
 import java.util.List;
