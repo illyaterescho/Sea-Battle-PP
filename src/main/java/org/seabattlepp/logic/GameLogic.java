@@ -10,6 +10,7 @@ import org.seabattlepp.ships.ShipValidator;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 
 public class GameLogic {
@@ -26,6 +27,7 @@ public class GameLogic {
     private final UIMarkingLogic uiMarkingLogic;
     private int[][] playerTargetedArea;
     private int[][] computerTargetedArea;
+    private boolean isGameEnded; // Прапорець для контролю закінчення гри
 
     public GameLogic(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
         this.mainFrame = mainFrame;
@@ -36,6 +38,7 @@ public class GameLogic {
         this.isPlayerTurn = true;
         this.isGameStarted = false;
         this.isRandomButtonPressed = false;
+        this.isGameEnded = false; // Ініціалізація прапорця
         this.playerTargetedArea = new int[11][11];
         this.computerTargetedArea = new int[11][11];
         resetComputerShipsLocations();
@@ -120,6 +123,7 @@ public class GameLogic {
         clearRightBoardShips();
         isGameStarted = false;
         isRandomButtonPressed = false;
+        // Не скидаємо isGameEnded тут, щоб уникнути повторного виклику endGame
         resetGame();
         enablePlayerButtonsForPlacement();
         disableComputerButtons();
@@ -127,7 +131,7 @@ public class GameLogic {
 
     public void setGameStarted(boolean started) {
         isGameStarted = started;
-        if (started && !isPlayerTurn()) {
+        if (started && !isPlayerTurn() && !isGameEnded) {
             this.startComputerTurn();
         }
     }
@@ -209,7 +213,7 @@ public class GameLogic {
     }
 
     public void processPlayerShot(int row, int col) {
-        if (!isPlayerTurn) return;
+        if (!isPlayerTurn || isGameEnded) return;
 
         if (!isRandomButtonPressed) {
             System.out.println("Player tried to shoot before pressing Random button: row=" + row + ", col=" + col);
@@ -238,7 +242,7 @@ public class GameLogic {
             setPlayerTurn(false);
             disableComputerButtons();
             enablePlayerButtons();
-            if (isGameStarted) {
+            if (isGameStarted && !isGameEnded) {
                 this.startComputerTurn();
             }
         }
@@ -248,18 +252,22 @@ public class GameLogic {
             button.setEnabled(false);
         }
 
-        if (hit && !sunk && isGameStarted) {
+        if (hit && !sunk && isGameStarted && !isGameEnded) {
             enableComputerButtons();
         }
     }
 
     public void startPlayerTurn() {
+        if (isGameEnded) return;
         setPlayerTurn(true);
         enableComputerButtons();
         System.out.println("Player turn started");
     }
 
     public void startGame() {
+        if (isGameEnded) {
+            isGameEnded = false; // Скидаємо прапорець перед новою грою
+        }
         isPlayerTurn = true;
         setGameStarted(true);
         disableComputerButtons();
@@ -296,6 +304,7 @@ public class GameLogic {
     }
 
     public void startComputerTurn() {
+        if (isGameEnded) return;
         aiLogic.startComputerTurn();
     }
 
@@ -322,8 +331,8 @@ public class GameLogic {
     }
 
     public boolean markHitPlayerBoard(int row, int col, Ship ship) {
-        if (!isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
-            System.out.println("Computer tried to shoot at already used cell: row=" + row + ", col=" + col);
+        if (isGameEnded || !isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
+            System.out.println("Computer tried to shoot at already used cell or game ended: row=" + row + ", col=" + col);
             return false;
         }
 
@@ -337,6 +346,9 @@ public class GameLogic {
                 uiMarkingLogic.markSunkShipPlayerBoard(ship);
                 markSurroundingCellsAsShot(ship);
                 checkGameEnd();
+                if (isGameEnded) {
+                    aiLogic.stopAI(); // Зупиняємо AI після завершення гри
+                }
             } else {
                 uiMarkingLogic.markHitSymbolPlayerBoard(playerShipButtons[row][col]);
             }
@@ -348,7 +360,6 @@ public class GameLogic {
         for (int[] coord : ship.getCoordinates()) {
             int row = coord[0];
             int col = coord[1];
-            // Перевіряємо всі сусідні клітинки (включаючи діагоналі)
             for (int dr = -1; dr <= 1; dr++) {
                 for (int dc = -1; dc <= 1; dc++) {
                     int newRow = row + dr;
@@ -373,8 +384,8 @@ public class GameLogic {
     }
 
     public void markMissPlayerBoard(int row, int col) {
-        if (!isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
-            System.out.println("Computer tried to shoot at already used cell: row=" + row + ", col=" + col);
+        if (isGameEnded || !isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
+            System.out.println("Computer tried to shoot at already used cell or game ended: row=" + row + ", col=" + col);
             return;
         }
 
@@ -438,27 +449,139 @@ public class GameLogic {
     }
 
     public void checkGameEnd() {
-        boolean computerSunk = computerShipsLocationsIsEmpty();
-        boolean playerSunk = playerShipsLocationsIsEmpty();
+        if (isGameEnded) return;
 
+        boolean playerSunk = playerShipsLocationsIsEmpty();
+        if (playerSunk) {
+            endGame(false);
+            return;
+        }
+
+        boolean computerSunk = computerShipsLocationsIsEmpty();
         if (computerSunk) {
             endGame(true);
-        } else if (playerSunk) {
-            endGame(false);
         }
     }
 
     private void endGame(boolean playerWon) {
-        JOptionPane.showMessageDialog(
-                mainFrame,
-                playerWon ? "Ви перемогли!" : "Комп'ютер переміг!",
-                "Кінець гри!",
-                JOptionPane.INFORMATION_MESSAGE
-        );
-        setGameStarted(false);
-        mainFrame.disableRandomButton();
-        resetBoards();
-        aiLogic.resetAI();
+        if (isGameEnded) return;
+        isGameEnded = true;
+        System.out.println("Ending game with playerWon=" + playerWon + " at " + new java.util.Date());
+        SwingUtilities.invokeLater(() -> {
+            // Створюємо кастомний JDialog
+            JDialog dialog = new JDialog(mainFrame, "Кінець гри!", true);
+            dialog.setSize(400, 200);
+            dialog.setLocationRelativeTo(mainFrame);
+            dialog.setLayout(new BorderLayout());
+
+            // Панель без синього градієнтного фону
+            JPanel backgroundPanel = new JPanel();
+            backgroundPanel.setLayout(new BorderLayout());
+            backgroundPanel.setBackground(Color.WHITE); // Встановлюємо білий фон
+            dialog.add(backgroundPanel);
+
+            // Текст повідомлення
+            JLabel messageLabel = new JLabel(playerWon ? "<html><h1 style='color:gold; font-family:Old English Text MT, serif;'>Ви перемогли!</h1></html>" :
+                    "<html><h1 style='color:gold; font-family:Old English Text MT, serif;'>Комп'ютер переміг!</h1></html>");
+            messageLabel.setHorizontalAlignment(JLabel.CENTER);
+            backgroundPanel.add(messageLabel, BorderLayout.CENTER);
+
+            // Панель для кнопок
+            JPanel buttonPanel = new JPanel(new FlowLayout());
+            RoundedButton newGameButton = new RoundedButton("Нова гра");
+            RoundedButton closeButton = new RoundedButton("Вийти");
+
+            // Стилізація кнопок
+            newGameButton.setForeground(new Color(0, 100, 0)); // Зелене текстове забарвлення
+            closeButton.setForeground(new Color(139, 0, 0)); // Червоне текстове забарвлення
+            newGameButton.setFont(new Font("SansSerif", Font.BOLD, 18)); // Стандартний шрифт
+            closeButton.setFont(new Font("SansSerif", Font.BOLD, 18)); // Стандартний шрифт
+            newGameButton.setOpaque(false); // Прибрати фон
+            closeButton.setOpaque(false); // Прибрати фон
+            newGameButton.setFocusPainted(false);
+            closeButton.setFocusPainted(false);
+            newGameButton.setContentAreaFilled(false); // Прибрати заповнення
+            closeButton.setContentAreaFilled(false); // Прибрати заповнення
+            newGameButton.setBorderPainted(false); // Прибрати стандартну рамку
+            closeButton.setBorderPainted(false); // Прибрати стандартну рамку
+
+            // Збільшуємо розміри кнопок
+            newGameButton.setPreferredSize(new Dimension(120, 40)); // Більший розмір
+            closeButton.setPreferredSize(new Dimension(120, 40)); // Більший розмір
+
+            // Дії для кнопок
+            newGameButton.addActionListener(e -> {
+                dialog.dispose();
+                resetBoards();
+                startGame();
+            });
+            closeButton.addActionListener(e -> {
+                dialog.dispose();
+                System.exit(0);
+            });
+
+            buttonPanel.add(newGameButton);
+            buttonPanel.add(closeButton);
+            backgroundPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+            // Відображення діалогу
+            dialog.setVisible(true);
+            System.out.println("Dialog shown for playerWon=" + playerWon + " at " + new java.util.Date());
+            setGameStarted(false);
+            mainFrame.disableRandomButton();
+            mainFrame.enableStartButton();
+            aiLogic.stopAI(); // Зупиняємо AI перед скиданням
+            resetBoards();
+            aiLogic.resetAI();
+            isGameEnded = false; // Скидаємо після завершення всіх дій
+            System.out.println("Game reset after end with playerWon=" + playerWon + " at " + new java.util.Date());
+        });
+    }
+
+    // Внутрішній клас для заокруглених кнопок
+    private static class RoundedButton extends JButton {
+        private static final int ARC_WIDTH = 20;
+        private static final int ARC_HEIGHT = 20;
+
+        public RoundedButton(String text) {
+            super(text);
+            setFocusPainted(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getBackground());
+            g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, ARC_WIDTH, ARC_HEIGHT);
+            super.paintComponent(g2);
+            g2.dispose();
+        }
+
+        @Override
+        protected void paintBorder(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(getForeground());
+            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, ARC_WIDTH, ARC_HEIGHT);
+            g2.dispose();
+        }
+    }
+
+    // Метод для отримання кастомного шрифту (залишив для сумісності, хоча більше не використовується в endGame)
+    private Font getCustomFont() {
+        try {
+            // Спроба завантажити шрифт із файлу (замініть шлях на реальний)
+            File fontFile = new File("src/main/resources/fonts/PiratesBay.ttf"); // Приклад шляху
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(Font.BOLD, 16);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(customFont);
+            return customFont;
+        } catch (Exception e) {
+            // Якщо шрифт не знайдено, використовуємо доступний системний шрифт
+            System.err.println("Custom font not found, using Old English Text MT or default");
+            return new Font("Old English Text MT", Font.BOLD, 16);
+        }
     }
 
     public void resetGame() {
@@ -467,6 +590,7 @@ public class GameLogic {
         aiLogic.resetAI();
         isPlayerTurn = true;
         isRandomButtonPressed = false;
+        // Не скидаємо isGameEnded тут
         for (int i = 0; i <= 10; i++) {
             for (int j = 0; j <= 10; j++) {
                 playerTargetedArea[i][j] = 0;
@@ -505,13 +629,15 @@ public class GameLogic {
         ShipButton button = playerShipButtons[row][col];
         if (button != null) {
             String text = button.getText();
-            // Забороняємо стріляти в клітинки з символом "•"
             if ("•".equals(text)) {
                 return false;
             }
-            // Дозволяємо стріляти, якщо немає іконки
             return button.getIcon() == null;
         }
         return false;
+    }
+
+    public boolean isGameEnded() {
+        return isGameEnded;
     }
 }

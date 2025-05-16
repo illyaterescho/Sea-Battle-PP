@@ -102,4 +102,10 @@ public class MainFrame extends JFrame {
             randomButton.setEnabled(false);
         }
     }
+
+    public void enableStartButton() {
+        if (startButton != null) {
+            startButton.setEnabled(true);
+        }
+    }
 }
