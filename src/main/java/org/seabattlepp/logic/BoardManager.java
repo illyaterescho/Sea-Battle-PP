@@ -1,49 +1,42 @@
 //package org.seabattlepp.logic;
 //
-////import javax.swing.*;
-////import javax.swing.plaf.basic.BasicButtonUI;
-////import java.awt.*;
-////import java.util.List;
-//
+//import java.awt.*;
 //import org.seabattlepp.logic.GameLogic;
+//import org.seabattlepp.ships.Ship;
+//import org.seabattlepp.ships.ShipPlacer;
+//import org.seabattlepp.ships.ShipValidator;
+//import org.seabattlepp.gui.ShipButton;
+//
+//import javax.swing.plaf.basic.BasicButtonUI;
+//import java.util.List;
 //
 //
 //public class BoardManager {
+//    private final GameLogic gameLogic;
+//    private final AILogic aiLogic;
 //
 //
-//    public BoardManager(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
-//        this.mainFrame = mainFrame;
-//        this.computerShipButtons = computerShipButtons;
-//        this.playerShipButtons = playerShipButtons;
-//        this.aiLogic = new AILogic(this, playerShipButtons);
-//        this.uiMarkingLogic = new UIMarkingLogic(this, computerShipButtons, playerShipButtons);
-//        this.isPlayerTurn = true;
-//        this.isGameStarted = false;
-//        this.isRandomButtonPressed = false;
-//        this.isGameEnded = false;
-//        this.playerTargetedArea = new int[11][11];
-//        this.computerTargetedArea = new int[11][11];
-//        resetComputerShipsLocations();
-//        resetPlayerShipsLocations();
+//    public BoardManager() {
+//        this.gameLogic = new GameLogic();
 //    }
 //
 //    // Розміщує кораблі випадковим чином на лівому полі (гравця).
 //    public void placeShipsRandomlyOnLeftBoard() {
 //        ShipPlacer placer = new ShipPlacer(new ShipValidator());
 //        List<Ship> placedShips = placer.placeShipsRandomly();
-//        resetPlayerShipsLocations();
+//        gameLogic.resetPlayerShipsLocations();
 //        for (Ship ship : placedShips) {
 //            for (int[] coord : ship.getCoordinates()) {
 //                int row = coord[0];
 //                int col = coord[1];
-//                playerShipsLocations[row][col] = ship;
+//                gameLogic.playerShipsLocations[row][col] = ship;
 //            }
 //        }
 //        clearLeftBoardShips();
 //        for (Ship ship : placedShips) {
 //            for (int[] coord : ship.getCoordinates()) {
 //                int row = coord[0], col = coord[1];
-//                ShipButton button = playerShipButtons[row][col];
+//                ShipButton button = gameLogic.playerShipButtons[row][col];
 //                if (button != null) {
 //                    button.setText("⚓");
 //                    button.setFont(new Font("Inter", Font.BOLD, 50));
@@ -59,19 +52,19 @@
 //    public void placeShipsRandomlyOnRightBoard() {
 //        ShipPlacer placer = new ShipPlacer(new ShipValidator());
 //        List<Ship> placedShips = placer.placeShipsRandomly();
-//        resetComputerShipsLocations();
+//        gameLogic.resetComputerShipsLocations();
 //        for (Ship ship : placedShips) {
 //            for (int[] coord : ship.getCoordinates()) {
 //                int row = coord[0];
 //                int col = coord[1];
-//                computerShipsLocations[row][col] = ship;
+//                gameLogic.computerShipsLocations[row][col] = ship;
 //            }
 //        }
 //        clearRightBoardShips();
 //        for (Ship ship : placedShips) {
 //            for (int[] coord : ship.getCoordinates()) {
 //                int row = coord[0], col = coord[1];
-//                ShipButton button = computerShipButtons[row][col];
+//                ShipButton button = gameLogic.computerShipButtons[row][col];
 //                if (button != null) {
 //                    button.setBackground(Color.WHITE);
 //                    button.setFont(new Font("Inter", Font.BOLD, 25));
@@ -87,7 +80,7 @@
 //    public void clearLeftBoardShips() {
 //        for (int i = 1; i <= 10; i++) {
 //            for (int j = 1; j <= 10; j++) {
-//                ShipButton button = playerShipButtons[i][j];
+//                ShipButton button = gameLogic.playerShipButtons[i][j];
 //                if (button != null) {
 //                    button.setText("");
 //                    button.setIcon(null);
@@ -103,7 +96,7 @@
 //    public void clearRightBoardShips() {
 //        for (int i = 1; i <= 10; i++) {
 //            for (int j = 1; j <= 10; j++) {
-//                ShipButton button = computerShipButtons[i][j];
+//                ShipButton button = gameLogic.computerShipButtons[i][j];
 //                if (button != null) {
 //                    button.setText("");
 //                    button.setIcon(null);
@@ -119,17 +112,17 @@
 //    public void resetBoards() {
 //        clearLeftBoardShips();
 //        clearRightBoardShips();
-//        isGameStarted = false;
-//        isRandomButtonPressed = false;
-//        resetComputerShipsLocations();
-//        resetPlayerShipsLocations();
+//        gameLogic.isGameStarted = false;
+//        gameLogic.isRandomButtonPressed = false;
+//        gameLogic.resetComputerShipsLocations();
+//        gameLogic.resetPlayerShipsLocations();
 //        aiLogic.resetAI();
-//        isPlayerTurn = true;
-//        isRandomButtonPressed = false;
+//        gameLogic.isPlayerTurn = true;
+//        gameLogic.isRandomButtonPressed = false;
 //        for (int i = 0; i <= 10; i++) {
 //            for (int j = 0; j <= 10; j++) {
-//                playerTargetedArea[i][j] = 0;
-//                computerTargetedArea[i][j] = 0;
+//                gameLogic.playerTargetedArea[i][j] = 0;
+//                gameLogic.computerTargetedArea[i][j] = 0;
 //            }
 //        }
 //        enablePlayerButtonsForPlacement();

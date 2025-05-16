@@ -446,104 +446,20 @@ public class GameLogic {
         isGameEnded = true;
         System.out.println("Ending game with playerWon=" + playerWon + " at " + new java.util.Date());
         SwingUtilities.invokeLater(() -> {
-            // Створюємо кастомний JDialog
-            JDialog dialog = new JDialog(mainFrame, "Кінець гри!", true);
-            dialog.setSize(400, 200);
-            dialog.setLocationRelativeTo(mainFrame);
-            dialog.setLayout(new BorderLayout());
-
-            // Панель без синього градієнтного фону
-            JPanel backgroundPanel = new JPanel();
-            backgroundPanel.setLayout(new BorderLayout());
-            backgroundPanel.setBackground(Color.WHITE); // Встановлюємо білий фон
-            dialog.add(backgroundPanel);
-
-            // Текст повідомлення
-            JLabel messageLabel = new JLabel(playerWon ? "<html><h1 style='color:gold; font-family:Old English Text MT, serif;'>Ви перемогли!</h1></html>" :
-                    "<html><h1 style='color:gold; font-family:Old English Text MT, serif;'>Комп'ютер переміг!</h1></html>");
-            messageLabel.setHorizontalAlignment(JLabel.CENTER);
-            backgroundPanel.add(messageLabel, BorderLayout.CENTER);
-
-            // Панель для кнопок
-            JPanel buttonPanel = new JPanel(new FlowLayout());
-            RoundedButton newGameButton = new RoundedButton("Нова гра");
-            RoundedButton closeButton = new RoundedButton("Вийти");
-
-            // Стилізація кнопок
-            newGameButton.setForeground(new Color(0, 100, 0)); // Зелене текстове забарвлення
-            closeButton.setForeground(new Color(139, 0, 0)); // Червоне текстове забарвлення
-            newGameButton.setFont(new Font("SansSerif", Font.BOLD, 18)); // Стандартний шрифт
-            closeButton.setFont(new Font("SansSerif", Font.BOLD, 18)); // Стандартний шрифт
-            newGameButton.setOpaque(false); // Прибрати фон
-            closeButton.setOpaque(false); // Прибрати фон
-            newGameButton.setFocusPainted(false);
-            closeButton.setFocusPainted(false);
-            newGameButton.setContentAreaFilled(false); // Прибрати заповнення
-            closeButton.setContentAreaFilled(false); // Прибрати заповнення
-            newGameButton.setBorderPainted(false); // Прибрати стандартну рамку
-            closeButton.setBorderPainted(false); // Прибрати стандартну рамку
-
-            // Збільшуємо розміри кнопок
-            newGameButton.setPreferredSize(new Dimension(120, 40)); // Більший розмір
-            closeButton.setPreferredSize(new Dimension(120, 40)); // Більший розмір
-
-            // Дії для кнопок
-            newGameButton.addActionListener(e -> {
-                dialog.dispose();
-                resetBoards();
-                startGame();
-            });
-            closeButton.addActionListener(e -> {
-                dialog.dispose();
-                System.exit(0);
-            });
-
-            buttonPanel.add(newGameButton);
-            buttonPanel.add(closeButton);
-            backgroundPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-            // Відображення діалогу
-            dialog.setVisible(true);
-            System.out.println("Dialog shown for playerWon=" + playerWon + " at " + new java.util.Date());
-            setGameStarted(false);
-            mainFrame.randomButton.setEnabled(false);
-            mainFrame.startButton.setEnabled(true);
-            aiLogic.stopAI(); // Зупиняємо AI перед скиданням
+            String message = playerWon ? "Ви перемогли!" : "Комп'ютер переміг!";
+            JOptionPane.showMessageDialog(mainFrame, message, "Кінець гри!", JOptionPane.INFORMATION_MESSAGE);
+            isGameStarted = false;
+            if (mainFrame.randomButton != null) {
+                mainFrame.randomButton.setEnabled(false);
+            }
+            if (mainFrame.startButton != null) {
+                mainFrame.startButton.setEnabled(true);
+            }
+            aiLogic.stopAI();
             resetBoards();
             aiLogic.resetAI();
-            isGameEnded = false; // Скидаємо після завершення всіх дій
-            System.out.println("Game reset after end with playerWon=" + playerWon + " at " + new java.util.Date());
+            isGameEnded = false;
         });
-    }
-
-    // Внутрішній клас для заокруглених кнопок
-    private static class RoundedButton extends JButton {
-        private static final int ARC_WIDTH = 20;
-        private static final int ARC_HEIGHT = 20;
-
-        public RoundedButton(String text) {
-            super(text);
-            setFocusPainted(false);
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(getBackground());
-            g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, ARC_WIDTH, ARC_HEIGHT);
-            super.paintComponent(g2);
-            g2.dispose();
-        }
-
-        @Override
-        protected void paintBorder(Graphics g) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(getForeground());
-            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, ARC_WIDTH, ARC_HEIGHT);
-            g2.dispose();
-        }
     }
 
     public boolean isPlayerShotAt(int row, int col) {
