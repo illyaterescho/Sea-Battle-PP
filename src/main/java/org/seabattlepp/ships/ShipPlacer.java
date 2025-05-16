@@ -4,17 +4,18 @@ import java.util.*;
 
 public class ShipPlacer {
     private final ShipValidator validator;
-    private final Random random = new Random();
+    private final Random random;
 
     public ShipPlacer(ShipValidator validator) {
         this.validator = validator;
+        this.random = new Random();
     }
 
-    // Основний метод, який розміщує кораблі випадковим чином
+    // 🔹 Основний метод — випадкове розміщення кораблів на дошці
     public List<Ship> placeShipsRandomly() {
-        List<Ship> ships = createShipList(); // для створення списку кораблів для розміщення
+        List<Ship> ships = createShipList(); // створюємо список кораблів заданої конфігурації
         List<Ship> placedShips = new ArrayList<>();
-        Set<String> occupiedCoordinates = new HashSet<>(); // для зайнятих координат
+        Set<String> occupiedCoordinates = new HashSet<>(); // трекер зайнятих координат
 
         for (Ship ship : ships) {
             boolean placed = false;
@@ -33,10 +34,12 @@ public class ShipPlacer {
                     placed = true;
                 }
             }
+            // Якщо не вдалося — повторюємо по циклу
         }
         return placedShips;
     }
 
+    // 🔹 Повертає список кораблів стандартної конфігурації
     private List<Ship> createShipList() {
         List<org.seabattlepp.ships.Ship> ships = new ArrayList<>();
 
@@ -59,7 +62,7 @@ public class ShipPlacer {
     private List<int[]> generateCoordinates(Ship ship, int startRow, int startCol, boolean isHorizontal) {
         List<int[]> coordinates = new ArrayList<>();
         if (isHorizontal) {
-            // Якщо виходить за межі праворуч — зсуваємо вліво
+            // Коригування, щоб не вийти за межі правого краю
             if (startCol + ship.getLength() > 11) {
                 startCol = 11 - ship.getLength();
             }
@@ -67,9 +70,9 @@ public class ShipPlacer {
                 coordinates.add(new int[]{startRow, startCol + i});
             }
         } else { // Вертикальне розташування
-            // Якщо виходить за межі вниз — зсуваємо вгору
+            // Коригування, щоб не вийти за нижню межу
             if (startRow + ship.getLength() > 11) {
-                startRow = 11 - ship.getLength(); // зсув вгору якщо виходить за межі
+                startRow = 11 - ship.getLength();
             }
             for (int i = 0; i < ship.getLength(); i++) {
                 coordinates.add(new int[]{startRow + i, startCol});

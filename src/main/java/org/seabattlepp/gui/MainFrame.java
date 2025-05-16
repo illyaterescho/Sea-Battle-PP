@@ -6,30 +6,35 @@ import org.seabattlepp.logic.GameLogic;
 
 public class MainFrame extends JFrame {
 
-    // панельки
-    private final BoardPanel boardPanel;
-    private final ShipPanel shipPanel;
-    private final ButtonPanel buttonPanel;
+    // 🔷 Кнопки
+    public RoundedButton randomButton;
+    public JButton startButton;
+    public JButton resetButton;
 
-    // логіка
+    // 🔷 Панельки
+    public BoardPanel boardPanel;
+    public ShipPanel shipPanel;
+    public ButtonPanel buttonPanel;
+
+    // 🔷 Логіка гри
     private final GameLogic gameLogic;
-
-    // кнопки
-    private RoundedButton randomButton;
-    private final JButton startButton;
-    private final JButton resetButton;
 
     public MainFrame() {
         setTitle("Морський Бій");
+
+        // 🖼 Спроба завантажити іконку гри
         try {
             Image image = Toolkit.getDefaultToolkit().getImage("src/main/java/org/seabattlepp/img/icon.png");
             setIconImage(image);
         } catch (Exception e) {
             System.err.println("помилка завантаження іконки: " + e.getMessage());
         }
+
+        // 🔧 Стандартні налаштування JFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(20, 20));
 
+        // 📦 Основна панель контенту з відступами
         JPanel contentPane = new JPanel(new BorderLayout());
         contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setContentPane(contentPane);
@@ -38,9 +43,6 @@ public class MainFrame extends JFrame {
         boardPanel = new BoardPanel(this);
         shipPanel = new ShipPanel();
         buttonPanel = new ButtonPanel();
-
-        // 3️⃣ Створюємо логіку гри
-        gameLogic = new GameLogic(this, boardPanel.computerShipButtons, boardPanel.playerShipButtons);
 
         // 4️⃣ Кнопки
         startButton = buttonPanel.getStartButton();
@@ -54,58 +56,56 @@ public class MainFrame extends JFrame {
             }
         }
 
-        if (randomButton != null) {
-            randomButton.setEnabled(false);
-            randomButton.addActionListener(e -> {
-                gameLogic.placeShipsRandomlyOnLeftBoard();
-                gameLogic.enableShootingAfterRandom(); // Активуємо стрільбу після натискання "Рандом"
-                randomButton.setEnabled(false); // Деактивуємо після натискання
-                System.out.println("Random button clicked: ships placed and shooting enabled");
-            });
-        }
-
-        if (startButton != null) {
-            startButton.addActionListener(e -> {
-                if (!gameLogic.isGameStarted()) {
-                    gameLogic.placeShipsRandomlyOnRightBoard();
-                    if (randomButton != null) {
-                        randomButton.setEnabled(true); // Активуємо після старту гри
-                    }
-                    gameLogic.startGame();
-                    startButton.setEnabled(false);
-                }
-            });
-        }
-
-        if (resetButton != null) {
-            resetButton.addActionListener(e -> {
-                gameLogic.resetBoards();
-                if (randomButton != null) {
-                    randomButton.setEnabled(true); // Активуємо після скидання
-                }
-                startButton.setEnabled(true);
-            });
-        }
-
-        // 6️⃣ Додаємо все на екран
+        // 6️⃣ Додаємо панелі на головне вікно
         add(boardPanel, BorderLayout.CENTER);
         add(shipPanel, BorderLayout.SOUTH);
         add(buttonPanel, BorderLayout.NORTH);
 
+        // 📏 Налаштування розміру вікна
         pack();
         setLocationRelativeTo(null);
-        setVisible(true);
-    }
 
-    public void disableRandomButton() {
+        // 3️⃣ Створюємо логіку гри
+        gameLogic = new GameLogic(this, boardPanel.computerShipButtons, boardPanel.playerShipButtons);
+
+        // 🌀 Налаштування кнопки "Рандом"
         if (randomButton != null) {
-            randomButton.setEnabled(false);
+            randomButton.setEnabled(false); // Деактивована до початку гри
+            randomButton.addActionListener(e -> {
+                gameLogic.placeShipsRandomlyOnLeftBoard();
+                gameLogic.enableShootingAfterRandom(); // Активуємо стрільбу після натискання "Рандом"
+                System.out.println("Random button clicked: ships placed and shooting enabled");
+            });
         }
-    }
 
-    public void enableStartButton() {
+        // ▶️ Налаштування кнопки "Старт"
         if (startButton != null) {
-            startButton.setEnabled(true);
+            startButton.addActionListener(e -> {
+                if (!gameLogic.isGameStarted()) {
+                    gameLogic.placeShipsRandomlyOnRightBoard(); // Комп'ютер розставляє кораблі
+                    if (randomButton != null) {
+                        randomButton.setEnabled(true);  // Активуємо "Рандом" для гравця
+                    }
+                    gameLogic.startGame(); // Запускаємо гру
+                    startButton.setEnabled(false); // Забороняємо повторний старт
+                }
+            });
+        }
+
+        // 🔁 Налаштування кнопки "Скинути"
+        if (resetButton != null) {
+            resetButton.addActionListener(e -> {
+                gameLogic.resetBoards(); // Скидаємо стан полів
+                if (randomButton != null) {
+                    randomButton.setEnabled(false); // Деактивуємо "Рандом" після скидання
+                }
+                startButton.setEnabled(true); // Дозволяємо знову натиснути "Старт"
+            });
+        }
+
+        // 🔒 Додатково деактивуємо "Рандом", якщо гра ще не почалась
+        if (!gameLogic.isGameStarted()) {
+            randomButton.setEnabled(false);
         }
     }
 }

@@ -8,7 +8,7 @@ import javax.swing.*;
 
 public class AILogic {
 
-    private AIPlayer aiPlayer;
+    private final AIStrategy aiStrategy;
     private final GameLogic gameLogic;
     private final ShipButton[][] playerShipButtons;
     private Timer timer; // Поле для Timer
@@ -16,7 +16,7 @@ public class AILogic {
     public AILogic(GameLogic gameLogic, ShipButton[][] playerShipButtons) {
         this.gameLogic = gameLogic;
         this.playerShipButtons = playerShipButtons;
-        this.aiPlayer = new AIPlayer(gameLogic); // Передаємо GameLogic до AIPlayer
+        this.aiStrategy = new AIStrategy(); // Передаємо GameLogic до AIPlayer
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 if (playerShipButtons[i][j] == null) {
@@ -27,7 +27,7 @@ public class AILogic {
     }
 
     public void resetAI() {
-        aiPlayer.resetAI();
+        aiStrategy.reset();
         if (timer != null) {
             timer.stop(); // Зупиняємо таймер при скиданні AI
             System.out.println("Timer stopped in resetAI at " + new java.util.Date());
@@ -74,12 +74,12 @@ public class AILogic {
     }
 
     private int[] getValidShotCoordinates() {
-        int[] coordinates = null;
+        int[] coordinates;
         int attempts = 0;
         final int MAX_ATTEMPTS = 100;
 
         do {
-            coordinates = aiPlayer.makeTurn(playerShipButtons);
+            coordinates = aiStrategy.makeShot(playerShipButtons);
             attempts++;
             if (coordinates == null || attempts > MAX_ATTEMPTS) {
                 System.out.println("Max attempts reached or no coordinates available, returning null at " + new java.util.Date());
@@ -107,7 +107,6 @@ public class AILogic {
             // Перевіряємо валідність клітинки лише після всіх перевірок
             if (coordinates != null && !isValidCell(coordinates[0], coordinates[1])) {
                 coordinates = null; // Скидаємо, якщо клітинка невалідна
-                continue;
             }
         } while (coordinates == null);
 
@@ -154,7 +153,7 @@ public class AILogic {
             gameLogic.markMissPlayerBoard(row, col);
         }
 
-        aiPlayer.processShotResult(new int[]{row, col}, hit, sunk);
+        aiStrategy.processShotResult(new int[]{row, col}, hit, sunk);
 
         if (sunk && !gameLogic.isGameEnded()) {
             System.out.println("Checking game end after sunk ship at row=" + row + ", col=" + col + " at " + new java.util.Date());

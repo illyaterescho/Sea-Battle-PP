@@ -62,33 +62,33 @@ public class ShipPanel extends JPanel {
         JLabel imageLabel = new JLabel();
         imageLabel.setPreferredSize(new Dimension(50, 50));
         if (i == 0 && j == 0) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/pochatokKor.png"));
         } else if (i == 0 && j == 1) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/centerKor.png"));
         } else if (i == 0 && j == 2) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/centerKor.png"));
         } else if (i == 0 && j == 3) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/centerKor.png"));
         } else if (i == 0) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/kinecKor.png"));
         } else if (i == 1 && j == 0) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/pochatokKor.png"));
         } else if (i == 1 && j == 1) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/centerKor.png"));
         } else if (i == 1 && j == 2) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/centerKor.png"));
         } else if (i == 1) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/kinecKor.png"));
         } else if (i == 2 && j == 0) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/pochatokKor.png"));
         } else if (i == 2 && j == 1) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/centerKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/centerKor.png"));
         } else if (i == 2 && j == 2) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/kinecKor.png"));
         } else if (i == 3 && j == 0) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/pochatokKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/pochatokKor.png"));
         } else if (i == 3 && j == 1) {
-            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/img/kinecKor.png"));
+            imageLabel.setIcon(new ImageIcon("src/main/java/org/seabattlepp/gui/img/kinecKor.png"));
         }
         return imageLabel;
     }

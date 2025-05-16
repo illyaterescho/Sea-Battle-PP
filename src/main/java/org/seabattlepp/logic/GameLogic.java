@@ -528,8 +528,8 @@ public class GameLogic {
             dialog.setVisible(true);
             System.out.println("Dialog shown for playerWon=" + playerWon + " at " + new java.util.Date());
             setGameStarted(false);
-            mainFrame.disableRandomButton();
-            mainFrame.enableStartButton();
+            mainFrame.randomButton.setEnabled(false);
+            mainFrame.startButton.setEnabled(true);
             aiLogic.stopAI(); // Зупиняємо AI перед скиданням
             resetBoards();
             aiLogic.resetAI();

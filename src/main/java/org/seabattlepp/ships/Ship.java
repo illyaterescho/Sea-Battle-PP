@@ -25,12 +25,11 @@ public class Ship {
         this.coordinates = coordinates;
     }
 
-    // метод для фіксації влучання в корабель
+    // Метод, який викликається при влучанні в корабель
     public void takeHit() {
         this.hitsTaken++;
     }
 
-    // метод для перевірк, чи потоплено корабель
     public boolean isSunk() {
         return hitsTaken >= length;
     }
