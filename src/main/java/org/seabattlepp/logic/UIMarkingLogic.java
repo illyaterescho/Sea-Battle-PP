@@ -10,14 +10,10 @@ import java.util.Set;
 
 public class UIMarkingLogic {
 
-    private final ShipButton[][] computerShipButtons;
-    private final ShipButton[][] playerShipButtons;
     private final GameLogic gameLogic;
 
-    public UIMarkingLogic(GameLogic gameLogic, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
+    public UIMarkingLogic(GameLogic gameLogic) {
         this.gameLogic = gameLogic;
-        this.computerShipButtons = computerShipButtons;
-        this.playerShipButtons = playerShipButtons;
     }
 
     public void markHitSymbol(ShipButton button) {
@@ -62,11 +58,11 @@ public class UIMarkingLogic {
         for (int[] coord : ship.getCoordinates()) {
             int row = coord[0];
             int col = coord[1];
-            if (computerShipButtons[row][col] != null) {
-                markSunkCellUI(computerShipButtons[row][col]);
-                computerShipButtons[row][col].setEnabled(false);
-                computerShipButtons[row][col].setOpaque(false);
-                computerShipButtons[row][col].setText(null);
+            if (gameLogic.boardManager.computerShipButtons[row][col] != null) {
+                markSunkCellUI(gameLogic.boardManager.computerShipButtons[row][col]);
+                gameLogic.boardManager.computerShipButtons[row][col].setEnabled(false);
+                gameLogic.boardManager.computerShipButtons[row][col].setOpaque(false);
+                gameLogic.boardManager.computerShipButtons[row][col].setText(null);
             }
         }
         markSurroundingCellsAsMiss(ship);
@@ -76,11 +72,11 @@ public class UIMarkingLogic {
         for (int[] coord : ship.getCoordinates()) {
             int row = coord[0];
             int col = coord[1];
-            if (playerShipButtons[row][col] != null) {
-                markSunkCellUI(playerShipButtons[row][col]);
-                playerShipButtons[row][col].setEnabled(false);
-                playerShipButtons[row][col].setOpaque(false);
-                playerShipButtons[row][col].setIcon(null);
+            if (gameLogic.boardManager.playerShipButtons[row][col] != null) {
+                markSunkCellUI(gameLogic.boardManager.playerShipButtons[row][col]);
+                gameLogic.boardManager.playerShipButtons[row][col].setEnabled(false);
+                gameLogic.boardManager.playerShipButtons[row][col].setOpaque(false);
+                gameLogic.boardManager.playerShipButtons[row][col].setIcon(null);
             }
         }
         markSurroundingCellsAsMissPlayerBoard(ship);
@@ -112,16 +108,18 @@ public class UIMarkingLogic {
     }
 
     public void markMiss(int row, int col) {
-        ShipButton button = computerShipButtons[row][col];
+        ShipButton button = gameLogic.boardManager.computerShipButtons[row][col];
         if (button != null && button.isEnabled()) {
             markMissSymbol(button);
+            gameLogic.markPlayerShot(row, col); // Mark as shot in playerTargetedArea
         }
     }
 
     public void markMissPlayerBoard(int row, int col) {
-        ShipButton button = playerShipButtons[row][col];
+        ShipButton button = gameLogic.boardManager.playerShipButtons[row][col];
         if (button != null) {
             markMissSymbol(button);
+            gameLogic.markComputerShot(row, col); // Mark as shot in computerTargetedArea
         }
     }
 
@@ -143,7 +141,7 @@ public class UIMarkingLogic {
                 g2d.setColor(Color.BLACK);
                 g2d.setFont(new Font("Inter", Font.BOLD, 70));
                 FontMetrics fm = g2d.getFontMetrics();
-                String text = "•"; // Символ "•" використовується для промахів і обводки
+                String text = "•";
                 int textWidth = fm.stringWidth(text);
                 int x = (c.getWidth() - textWidth) / 2;
 
@@ -172,8 +170,9 @@ public class UIMarkingLogic {
                     String cellKey = adjacentRow + "," + adjacentCol;
 
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
-                        if (gameLogic.computerShipsLocations[adjacentRow][adjacentCol] == null && computerShipButtons[adjacentRow][adjacentCol] != null) {
-                            markMissSymbol(computerShipButtons[adjacentRow][adjacentCol]);
+                        if (gameLogic.boardManager.computerShipsLocations[adjacentRow][adjacentCol] == null && gameLogic.boardManager.computerShipButtons[adjacentRow][adjacentCol] != null) {
+                            markMissSymbol(gameLogic.boardManager.computerShipButtons[adjacentRow][adjacentCol]);
+                            gameLogic.markPlayerShot(adjacentRow, adjacentCol); // Mark as shot in playerTargetedArea
                             markedCells.add(cellKey);
                         }
                     }
@@ -199,9 +198,9 @@ public class UIMarkingLogic {
                     String cellKey = adjacentRow + "," + adjacentCol;
 
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
-                        if (gameLogic.playerShipsLocations[adjacentRow][adjacentCol] == null && playerShipButtons[adjacentRow][adjacentCol] != null) {
-                            // Додаємо обводку з символом "•" навколо потопленого корабля гравця
-                            markMissSymbol(playerShipButtons[adjacentRow][adjacentCol]);
+                        if (gameLogic.boardManager.playerShipsLocations[adjacentRow][adjacentCol] == null && gameLogic.boardManager.playerShipButtons[adjacentRow][adjacentCol] != null) {
+                            markMissSymbol(gameLogic.boardManager.playerShipButtons[adjacentRow][adjacentCol]);
+                            gameLogic.markComputerShot(adjacentRow, adjacentCol); // Mark as shot in computerTargetedArea
                             markedCells.add(cellKey);
                         }
                     }

@@ -15,7 +15,7 @@ public class AILogic {
     public AILogic(GameLogic gameLogic, ShipButton[][] playerShipButtons) {
         this.gameLogic = gameLogic;
         this.playerShipButtons = playerShipButtons;
-        this.aiStrategy = new AIStrategy(); // Передаємо GameLogic до AIPlayer
+        this.aiStrategy = new AIStrategy();
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 if (playerShipButtons[i][j] == null) {
@@ -25,69 +25,61 @@ public class AILogic {
         }
     }
 
-    public void resetAI() {
+    public void resetBot() {
         aiStrategy.reset();
         if (timer != null) {
-            timer.stop(); // Зупиняємо таймер при скиданні AI
-            System.out.println("Timer stopped in resetAI at " + new java.util.Date());
+            timer.stop();
         }
     }
 
+    // точка входу в хід комп'ютера
     public void startComputerTurn() {
         if (!gameLogic.isGameStarted || gameLogic.isGameEnded) {
-            System.out.println("Game not started or ended, skipping computer turn at " + new java.util.Date());
-            return;
         }
         gameLogic.setPlayerTurn(false);
-        gameLogic.disableComputerButtons();
-        gameLogic.disablePlayerButtons();
+        gameLogic.boardManager.disableComputerButtons();
+        gameLogic.boardManager.disablePlayerButtons();
 
         int[] shotCoordinates = getValidShotCoordinates();
-        System.out.println("Computer shot: " + (shotCoordinates != null ? java.util.Arrays.toString(shotCoordinates) : "null") + " at " + new java.util.Date());
 
         if (shotCoordinates == null) {
-            System.out.println("No shot coordinates, returning turn to player at " + new java.util.Date());
             gameLogic.startPlayerTurn();
             return;
         }
 
-        // Зупиняємо попередній таймер, якщо він існує
         if (timer != null) {
             timer.stop();
-            System.out.println("Previous timer stopped in startComputerTurn at " + new java.util.Date());
         }
 
         timer = new Timer(1000, e -> {
             boolean hit = processComputerShot(shotCoordinates[0], shotCoordinates[1]);
-            System.out.println("Computer shot result: hit=" + hit + " at " + new java.util.Date());
             if (!hit && !gameLogic.isGameEnded) {
                 gameLogic.setPlayerTurn(true);
-                gameLogic.enableComputerButtons();
+                gameLogic.boardManager.enableComputerButtons();
             } else if (hit && gameLogic.isGameStarted && !gameLogic.isGameEnded && !gameLogic.isPlayerTurn) {
-                startComputerTurn(); // Продовжуємо хід лише якщо гра триває
+                startComputerTurn();
             }
         });
         timer.setRepeats(false);
         timer.start();
-        System.out.println("Timer started for shot at " + new java.util.Date());
     }
 
+    // обирає допустиму клітинку для пострілу
     private int[] getValidShotCoordinates() {
         int[] coordinates;
         int attempts = 0;
         final int MAX_ATTEMPTS = 100;
 
         do {
-            coordinates = aiStrategy.makeShot(playerShipButtons);
+            coordinates = aiStrategy.chooseShot(playerShipButtons);
             attempts++;
             if (coordinates == null || attempts > MAX_ATTEMPTS) {
-                System.out.println("Max attempts reached or no coordinates available, returning null at " + new java.util.Date());
                 return null;
             }
 
             // Перевіряємо, чи клітинка доступна через GameLogic
             boolean isAvailable = gameLogic.isCellAvailableForShot(coordinates[0], coordinates[1]);
-            boolean isNotShot = !gameLogic.isComputerShotAt(coordinates[0], coordinates[1]);
+            boolean isNotShot = !gameLogic.boardManager.isComputerShotAt(coordinates[0], coordinates[1]);
             String cellText = playerShipButtons[coordinates[0]][coordinates[1]] != null ?
                     playerShipButtons[coordinates[0]][coordinates[1]].getText() : "null";
 
@@ -112,6 +104,7 @@ public class AILogic {
         return coordinates;
     }
 
+    // виконує постріл комп'ютера в гравця
     public boolean processComputerShot(int row, int col) {
         if (!isValidCell(row, col)) {
             System.err.println("Invalid shot coordinates: row=" + row + ", col=" + col + " at " + new java.util.Date());
@@ -119,10 +112,8 @@ public class AILogic {
         }
 
         if (gameLogic.isGameEnded) {
-            System.out.println("Game already ended, skipping shot at row=" + row + ", col=" + col + " at " + new java.util.Date());
             if (timer != null) {
                 timer.stop();
-                System.out.println("Timer stopped in processComputerShot due to game end at " + new java.util.Date());
             }
             return false;
         }
@@ -134,15 +125,14 @@ public class AILogic {
         }
 
         // Додаткова перевірка перед пострілом
-        if (!gameLogic.isCellAvailableForShot(row, col) || gameLogic.isComputerShotAt(row, col)) {
-            System.out.println("Computer tried to shoot at already used cell in processComputerShot: row=" + row + ", col=" + col + ". Retrying... at " + new java.util.Date());
+        if (!gameLogic.isCellAvailableForShot(row, col) || gameLogic.boardManager.isComputerShotAt(row, col)) {
             if (!gameLogic.isGameEnded) {
                 startComputerTurn(); // Повторна спроба лише якщо гра не закінчена
             }
             return false;
         }
 
-        Ship ship = gameLogic.playerShipsLocations[row][col];
+        Ship ship = gameLogic.boardManager.playerShipsLocations[row][col];
         boolean hit = ship != null;
         boolean sunk = false;
 
@@ -155,22 +145,20 @@ public class AILogic {
         aiStrategy.processShotResult(new int[]{row, col}, hit, sunk);
 
         if (sunk && !gameLogic.isGameEnded) {
-            System.out.println("Checking game end after sunk ship at row=" + row + ", col=" + col + " at " + new java.util.Date());
             gameLogic.checkGameEnd();
         }
         return hit;
     }
 
+    // перевірка на коректність координат
     private boolean isValidCell(int row, int col) {
         return row >= 1 && row <= 10 && col >= 1 && col <= 10;
     }
 
-    // Оновлюємо метод для зупинки AI
-    public void stopAI() {
-        System.out.println("AI stopped at " + new java.util.Date());
+    // Зупиняє роботу таймера
+    public void stopTimer() {
         if (timer != null) {
             timer.stop();
-            System.out.println("Timer stopped in stopAI at " + new java.util.Date());
         }
     }
 }

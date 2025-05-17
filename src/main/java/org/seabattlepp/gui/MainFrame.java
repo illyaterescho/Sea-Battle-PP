@@ -3,6 +3,7 @@ package org.seabattlepp.gui;
 import javax.swing.*;
 import java.awt.*;
 import org.seabattlepp.logic.GameLogic;
+import org.seabattlepp.logic.BoardManager;
 
 public class MainFrame extends JFrame {
 
@@ -72,8 +73,8 @@ public class MainFrame extends JFrame {
         if (randomButton != null) {
             randomButton.setEnabled(false); // Деактивована до початку гри
             randomButton.addActionListener(e -> {
-                gameLogic.placeShipsRandomlyOnLeftBoard();
-                gameLogic.enableShootingAfterRandom();
+                gameLogic.boardManager.placeShipsRandomlyOnLeftBoard();
+                gameLogic.boardManager.enableShootingAfterRandom();
                 randomButton.setEnabled(true);
                 System.out.println("Random button clicked: ships placed and shooting enabled");
             });
@@ -83,7 +84,7 @@ public class MainFrame extends JFrame {
         if (startButton != null) {
             startButton.addActionListener(e -> {
                 if (!gameLogic.isGameStarted) {
-                    gameLogic.placeShipsRandomlyOnRightBoard(); // Комп'ютер розставляє кораблі
+                    gameLogic.boardManager.placeShipsRandomlyOnRightBoard(); // Комп'ютер розставляє кораблі
                     if (randomButton != null) {
                         randomButton.setEnabled(true);  // Активуємо "Рандом" для гравця
                     }

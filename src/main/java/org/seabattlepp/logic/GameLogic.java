@@ -1,301 +1,132 @@
 package org.seabattlepp.logic;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicButtonUI;
-import java.awt.*;
-import java.util.List;
 
 import org.seabattlepp.ships.Ship;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.gui.MainFrame;
-import org.seabattlepp.ships.ShipPlacer;
-import org.seabattlepp.ships.ShipValidator;
-
 
 public class GameLogic {
 
     private final MainFrame mainFrame;
-    // Двовимірні масиви кнопок, що представляють ігрові поля для кораблів комп'ютера та гравця.
-    private final ShipButton[][] computerShipButtons;
-    private final ShipButton[][] playerShipButtons;
-    // Двовимірні масиви для зберігання об'єктів кораблів, що відстежують їх позиції на полях.
-    public Ship[][] computerShipsLocations;
-    public Ship[][] playerShipsLocations;
+    public BoardManager boardManager;
     public boolean isGameStarted;
     public boolean isPlayerTurn;
-    private boolean isRandomButtonPressed;
     private final AILogic aiLogic;
     private final UIMarkingLogic uiMarkingLogic;
-    private final int[][] playerTargetedArea;
-    private final int[][] computerTargetedArea;
-    public boolean isGameEnded; // Прапорець для контролю закінчення гри
+    public boolean isGameEnded;
 
     public GameLogic(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
         this.mainFrame = mainFrame;
-        this.computerShipButtons = computerShipButtons;
-        this.playerShipButtons = playerShipButtons;
-        this.aiLogic = new AILogic(this, playerShipButtons);
-        this.uiMarkingLogic = new UIMarkingLogic(this, computerShipButtons, playerShipButtons);
+        this.boardManager = new BoardManager(computerShipButtons, playerShipButtons);
+        this.aiLogic = new AILogic(this, boardManager.playerShipButtons);
+        this.uiMarkingLogic = new UIMarkingLogic(this);
         this.isPlayerTurn = true;
         this.isGameStarted = false;
-        this.isRandomButtonPressed = false;
         this.isGameEnded = false;
-        this.playerTargetedArea = new int[11][11];
-        this.computerTargetedArea = new int[11][11];
-        resetComputerShipsLocations();
-        resetPlayerShipsLocations();
-    }
-
-    // Розміщує кораблі випадковим чином на лівому полі (гравця).
-    public void placeShipsRandomlyOnLeftBoard() {
-        ShipPlacer placer = new ShipPlacer(new ShipValidator());
-        List<Ship> placedShips = placer.placeShipsRandomly();
-        resetPlayerShipsLocations();
-        for (Ship ship : placedShips) {
-            for (int[] coord : ship.getCoordinates()) {
-                int row = coord[0];
-                int col = coord[1];
-                playerShipsLocations[row][col] = ship;
-            }
-        }
-        clearLeftBoardShips();
-        for (Ship ship : placedShips) {
-            for (int[] coord : ship.getCoordinates()) {
-                int row = coord[0], col = coord[1];
-                ShipButton button = playerShipButtons[row][col];
-                if (button != null) {
-                    button.setText("⚓");
-                    button.setFont(new Font("Inter", Font.BOLD, 50));
-                    button.setForeground(Color.BLACK);
-                    button.setBackground(Color.WHITE);
-                    button.setEnabled(true);
-                    button.setIcon(null);
-                }
-            }
-        }
-    }
-
-    public void placeShipsRandomlyOnRightBoard() {
-        ShipPlacer placer = new ShipPlacer(new ShipValidator());
-        List<Ship> placedShips = placer.placeShipsRandomly();
-        resetComputerShipsLocations();
-        for (Ship ship : placedShips) {
-            for (int[] coord : ship.getCoordinates()) {
-                int row = coord[0];
-                int col = coord[1];
-                computerShipsLocations[row][col] = ship;
-            }
-        }
-        clearRightBoardShips();
-        for (Ship ship : placedShips) {
-            for (int[] coord : ship.getCoordinates()) {
-                int row = coord[0], col = coord[1];
-                ShipButton button = computerShipButtons[row][col];
-                if (button != null) {
-                    button.setBackground(Color.WHITE);
-                    button.setFont(new Font("Inter", Font.BOLD, 25));
-                    button.setEnabled(true);
-                    button.setOpaque(false);
-                    button.setIcon(null);
-                }
-            }
-        }
-    }
-
-
-    public void clearLeftBoardShips() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                ShipButton button = playerShipButtons[i][j];
-                if (button != null) {
-                    button.setText("");
-                    button.setIcon(null);
-                    button.setBackground(Color.WHITE);
-                    button.setEnabled(true);
-                    button.setOpaque(false);
-                    button.setUI(new BasicButtonUI());
-                }
-            }
-        }
-    }
-
-    public void clearRightBoardShips() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                ShipButton button = computerShipButtons[i][j];
-                if (button != null) {
-                    button.setText("");
-                    button.setIcon(null);
-                    button.setBackground(Color.WHITE);
-                    button.setEnabled(true);
-                    button.setOpaque(false);
-                    button.setUI(new BasicButtonUI());
-                }
-            }
-        }
+        boardManager.resetComputerShipsLocations();
+        boardManager.resetPlayerShipsLocations();
     }
 
     public void resetBoards() {
-        clearLeftBoardShips();
-        clearRightBoardShips();
+        boardManager.clearLeftBoardShips();
+        boardManager.clearRightBoardShips();
         isGameStarted = false;
-        isRandomButtonPressed = false;
-        resetComputerShipsLocations();
-        resetPlayerShipsLocations();
-        aiLogic.resetAI();
+        boardManager.isRandomButtonPressed = false;
+        boardManager.resetComputerShipsLocations();
+        boardManager.resetPlayerShipsLocations();
+        aiLogic.resetBot();
         isPlayerTurn = true;
-        isRandomButtonPressed = false;
+        boardManager.isRandomButtonPressed = false;
         for (int i = 0; i <= 10; i++) {
             for (int j = 0; j <= 10; j++) {
-                playerTargetedArea[i][j] = 0;
-                computerTargetedArea[i][j] = 0;
+                boardManager.playerTargetedArea[i][j] = 0;
+                boardManager.computerTargetedArea[i][j] = 0;
             }
         }
-        enablePlayerButtonsForPlacement();
-        disableComputerButtons();
+        boardManager.disableComputerButtons();
     }
-
-
-    public void enablePlayerButtonsForPlacement() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                ShipButton button = playerShipButtons[i][j];
-                if (button != null) {
-                    button.setEnabled(true);
-                }
-            }
-        }
-    }
-
-    public void enableComputerButtons() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                ShipButton button = computerShipButtons[i][j];
-                if (button != null && button.getIcon() == null && button.getBackground() != Color.RED && !isPlayerShotAt(i, j)) {
-                    if (isRandomButtonPressed) {
-                        button.setEnabled(true);
-                    } else {
-                        button.setEnabled(false);
-                    }
-                }
-            }
-        }
-    }
-
-    public void enablePlayerButtons() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                ShipButton button = playerShipButtons[i][j];
-                if (button != null && button.getIcon() == null && button.getBackground() != Color.RED) {
-                    if (button.getText() == null || !button.getText().equals("⚓")) {
-                        button.setEnabled(true);
-                    }
-                }
-            }
-        }
-    }
-
-    public void disableComputerButtons() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                ShipButton button = computerShipButtons[i][j];
-                if (button != null) {
-                    button.setEnabled(false);
-                }
-            }
-        }
-    }
-
-    public void disablePlayerButtons() {
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                ShipButton button = playerShipButtons[i][j];
-                if (button != null) {
-                    if (button.getText() == null || !button.getText().equals("⚓")) {
-                        button.setEnabled(false);
-                    }
-                }
-            }
-        }
-    }
-
 
     public void setPlayerTurn(boolean playerTurn) {
         isPlayerTurn = playerTurn;
-        System.out.println("Turn set to: " + (playerTurn ? "Player" : "Computer"));
     }
 
     public void processPlayerShot(int row, int col) {
         if (!isPlayerTurn || isGameEnded) return;
 
-        if (!isRandomButtonPressed) {
-            System.out.println("Player tried to shoot before pressing Random button: row=" + row + ", col=" + col);
+        if (!boardManager.isRandomButtonPressed) {
             return;
         }
 
-        if (isPlayerShotAt(row, col)) {
-            System.out.println("Player tried to shoot at already used cell: row=" + row + ", col=" + col);
+        if (boardManager.isPlayerShotAt(row, col)) {
             return;
         }
 
         if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
-            playerTargetedArea[row][col] = 1;
+            boardManager.playerTargetedArea[row][col] = 1;
         }
 
-        Ship ship = computerShipsLocations[row][col];
+        Ship ship = boardManager.computerShipsLocations[row][col];
         boolean hit = ship != null;
         boolean sunk = false;
-
-        System.out.println("Player shot: row=" + row + ", col=" + col + ", hit=" + hit);
 
         if (hit) {
             sunk = markHit(row, col, ship);
             checkGameEnd();
         } else {
-            System.out.println("Player missed, marking miss at row=" + row + ", col=" + col);
-            if (computerShipButtons[row][col] != null) {
+            if (boardManager.computerShipButtons[row][col] != null) {
                 uiMarkingLogic.markMiss(row, col);
             }
             setPlayerTurn(false);
-            disableComputerButtons();
-            enablePlayerButtons();
+            boardManager.disableComputerButtons();
+            boardManager.enablePlayerButtons();
             if (isGameStarted && !isGameEnded) {
                 this.startComputerTurn();
             }
         }
 
-        ShipButton button = computerShipButtons[row][col];
+        ShipButton button = boardManager.computerShipButtons[row][col];
         if (button != null) {
             button.setEnabled(false);
         }
 
+        // Деактивуємо кнопку "Рандом" після пострілу
+        if (mainFrame.randomButton != null) {
+            mainFrame.randomButton.setEnabled(false);
+        }
+
         if (hit && !sunk && isGameStarted && !isGameEnded) {
-            enableComputerButtons();
+            boardManager.enableComputerButtons();
         }
     }
 
     public void startPlayerTurn() {
         if (isGameEnded) return;
         setPlayerTurn(true);
-        enableComputerButtons();
-        System.out.println("Player turn started");
+        if (mainFrame.randomButton != null) {
+            mainFrame.randomButton.setEnabled(true);
+        }
+        boardManager.isRandomButtonPressed = false;
     }
 
     public void startGame() {
         if (isGameEnded) {
-            isGameEnded = false; // Скидаємо прапорець перед новою грою
+            isGameEnded = false;
         }
         isPlayerTurn = true;
         setGameStarted(true);
-        disableComputerButtons();
-        disablePlayerButtons();
-        aiLogic.resetAI();
+        boardManager.disableComputerButtons();
+        boardManager.disablePlayerButtons();
+        aiLogic.resetBot();
+        if (mainFrame.randomButton != null) {
+            mainFrame.randomButton.setEnabled(true);
+        }
         startPlayerTurn();
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 int row = i;
                 int col = j;
-                ShipButton button = computerShipButtons[row][col];
+                ShipButton button = boardManager.computerShipButtons[row][col];
 
                 if (button != null) {
                     for (var l : button.getActionListeners()) {
@@ -304,7 +135,6 @@ public class GameLogic {
 
                     button.addActionListener(e -> {
                         if (button.isEnabled()) {
-                            System.out.println("Player clicked: row=" + row + ", col=" + col);
                             processPlayerShot(row, col);
                         }
                     });
@@ -313,7 +143,6 @@ public class GameLogic {
                 }
             }
         }
-        System.out.println("Game started, player turn: " + isPlayerTurn);
     }
 
     public void setGameStarted(boolean started) {
@@ -328,31 +157,29 @@ public class GameLogic {
         aiLogic.startComputerTurn();
     }
 
-
     public boolean markHit(int row, int col, Ship ship) {
         boolean sunk = false;
-        if (computerShipButtons[row][col] != null) {
+        if (boardManager.computerShipButtons[row][col] != null) {
             ship.takeHit();
             sunk = ship.isSunk();
             if (sunk) {
                 uiMarkingLogic.markSunkShip(ship);
             } else {
-                uiMarkingLogic.markHitSymbol(computerShipButtons[row][col]);
+                uiMarkingLogic.markHitSymbol(boardManager.computerShipButtons[row][col]);
             }
         }
         return sunk;
     }
 
     public boolean markHitPlayerBoard(int row, int col, Ship ship) {
-        if (isGameEnded || !isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
-            System.out.println("Computer tried to shoot at already used cell or game ended: row=" + row + ", col=" + col);
+        if (isGameEnded || !isCellAvailableForShot(row, col) || boardManager.isComputerShotAt(row, col)) {
             return false;
         }
 
         markComputerShot(row, col);
 
         boolean sunk = false;
-        if (playerShipButtons[row][col] != null) {
+        if (boardManager.playerShipButtons[row][col] != null) {
             ship.takeHit();
             sunk = ship.isSunk();
             if (sunk) {
@@ -364,87 +191,71 @@ public class GameLogic {
                         for (int dc = -1; dc <= 1; dc++) {
                             int newRow = r + dr;
                             int newCol = c + dc;
-                            if (newRow >= 1 && newRow <= 10 && newCol >= 1 && newCol <= 10 && !isComputerShotAt(newRow, newCol)) {
+                            if (newRow >= 1 && newRow <= 10 && newCol >= 1 && newCol <= 10 && !boardManager.isComputerShotAt(newRow, newCol)) {
                                 markComputerShot(newRow, newCol);
-                                System.out.println("Marked surrounding cell as shot in computerTargetedArea: row=" + newRow + ", col=" + newCol);
                             }
                         }
                     }
                 }
                 checkGameEnd();
                 if (isGameEnded) {
-                    aiLogic.stopAI(); // Зупиняємо AI після завершення гри
+                    aiLogic.stopTimer();
                 }
             } else {
-                uiMarkingLogic.markHitSymbolPlayerBoard(playerShipButtons[row][col]);
+                uiMarkingLogic.markHitSymbolPlayerBoard(boardManager.playerShipButtons[row][col]);
             }
         }
         return sunk;
     }
 
-
-
     public void markMissPlayerBoard(int row, int col) {
-        if (isGameEnded || !isCellAvailableForShot(row, col) || isComputerShotAt(row, col)) {
-            System.out.println("Computer tried to shoot at already used cell or game ended: row=" + row + ", col=" + col);
+        if (isGameEnded || !isCellAvailableForShot(row, col) || boardManager.isComputerShotAt(row, col)) {
             return;
         }
 
         markComputerShot(row, col);
 
-        if (playerShipButtons[row][col] != null) {
+        if (boardManager.playerShipButtons[row][col] != null) {
             uiMarkingLogic.markMissPlayerBoard(row, col);
         }
     }
 
-    public void resetComputerShipsLocations() {
-        computerShipsLocations = new Ship[11][11];
-    }
-
-    public void resetPlayerShipsLocations() {
-        playerShipsLocations = new Ship[11][11];
-    }
-
-
     public void checkGameEnd() {
         if (isGameEnded) return;
 
-        // Перевіряємо, чи всі кораблі гравця потоплені
-        boolean playerSunk = true; // Припускаємо, що всі потоплені
+        boolean playerSunk = true;
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
-                if (playerShipsLocations[i][j] != null && !playerShipsLocations[i][j].isSunk()) {
-                    playerSunk = false; // Знайдено непотоплений корабель
-                    break; // Виходимо з внутрішнього циклу
+                if (boardManager.playerShipsLocations[i][j] != null && !boardManager.playerShipsLocations[i][j].isSunk()) {
+                    playerSunk = false;
+                    break;
                 }
             }
-            if (!playerSunk) break; // Виходимо з зовнішнього циклу
+            if (!playerSunk) break;
         }
         if (playerSunk) {
-            endGame(false); // Комп'ютер переміг
+            endGame(false);
             return;
         }
 
-        // Перевіряємо, чи всі кораблі комп'ютера потоплені
-        boolean computerSunk = true; // Припускаємо, що всі потоплені
+        boolean computerSunk = true;
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
-                if (computerShipsLocations[i][j] != null && !computerShipsLocations[i][j].isSunk()) {
-                    computerSunk = false; // Знайдено непотоплений корабель
-                    break; // Виходимо з внутрішнього циклу
+                if (boardManager.computerShipsLocations[i][j] != null && !boardManager.computerShipsLocations[i][j].isSunk()) {
+                    computerSunk = false;
+                    break;
                 }
             }
-            if (!computerSunk) break; // Виходимо з зовнішнього циклу
+            if (!computerSunk) break;
         }
         if (computerSunk) {
-            endGame(true); // Гравець переміг
+            endGame(true);
         }
     }
 
     private void endGame(boolean playerWon) {
         if (isGameEnded) return;
         isGameEnded = true;
-        System.out.println("Ending game with playerWon=" + playerWon + " at " + new java.util.Date());
         SwingUtilities.invokeLater(() -> {
             String message = playerWon ? "Ви перемогли!" : "Комп'ютер переміг!";
             JOptionPane.showMessageDialog(mainFrame, message, "Кінець гри!", JOptionPane.INFORMATION_MESSAGE);
@@ -455,35 +266,27 @@ public class GameLogic {
             if (mainFrame.startButton != null) {
                 mainFrame.startButton.setEnabled(true);
             }
-            aiLogic.stopAI();
+            aiLogic.stopTimer();
             resetBoards();
-            aiLogic.resetAI();
+            aiLogic.resetBot();
             isGameEnded = false;
         });
     }
 
-    public boolean isPlayerShotAt(int row, int col) {
-        return playerTargetedArea[row][col] == 1;
-    }
-
-    public boolean isComputerShotAt(int row, int col) {
-        return computerTargetedArea[row][col] == 1;
-    }
-
     public void markComputerShot(int row, int col) {
         if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
-            computerTargetedArea[row][col] = 1;
+            boardManager.computerTargetedArea[row][col] = 1;
         }
     }
 
-    public void enableShootingAfterRandom() {
-        isRandomButtonPressed = true;
-        System.out.println("Shooting enabled after Random button press");
-        enableComputerButtons();
+    public void markPlayerShot(int row, int col) {
+        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
+            boardManager.playerTargetedArea[row][col] = 1;
+        }
     }
 
     public boolean isCellAvailableForShot(int row, int col) {
-        ShipButton button = playerShipButtons[row][col];
+        ShipButton button = boardManager.playerShipButtons[row][col];
         if (button != null) {
             String text = button.getText();
             if ("•".equals(text)) {

@@ -10,10 +10,10 @@ public class AIStrategy {
 
     private static final Random random = new Random();
     private Mode currentMode = Mode.RANDOM;
-    private List<int[]> hits = new ArrayList<>(); // Список влучань для поточного корабля
-    private int[][] targetedArea = new int[11][11]; // Відстеження пострілів (0 - не стріляно, 1 - стріляно)
-    private List<int[]> availableShots = new ArrayList<>(); // Доступні клітинки для пострілу
-    private GameLogic gameLogic; // Додаємо посилання на GameLogic для синхронізації
+    private List<int[]> hits = new ArrayList<>();
+    private int[][] targetedArea = new int[11][11];
+    private List<int[]> availableShots = new ArrayList<>();
+    private GameLogic gameLogic;
 
     public enum Mode {
         RANDOM, HUNT, TARGET
@@ -28,17 +28,17 @@ public class AIStrategy {
         this(null); // Конструктор без параметрів для сумісності
     }
 
-    public int[] makeShot(ShipButton[][] playerButtons) {
+    // метод для вибору пострілу
+    public int[] chooseShot(ShipButton[][] playerButtons) {
         updateAvailableShots(playerButtons);
 
         if (availableShots.isEmpty()) {
-            System.out.println("No available shots for computer!");
             return null;
         }
 
         int[] shot = null;
         int attempts = 0;
-        final int maxAttempts = 100; // Захист від нескінченного циклу
+        final int maxAttempts = 100;
 
         while (shot == null && attempts < maxAttempts) {
             switch (currentMode) {
@@ -60,7 +60,7 @@ public class AIStrategy {
             }
 
             // Додаткова перевірка через GameLogic, якщо він доступний
-            if (shot != null && gameLogic != null && gameLogic.isComputerShotAt(shot[0], shot[1])) {
+            if (shot != null && gameLogic != null && gameLogic.boardManager.isComputerShotAt(shot[0], shot[1])) {
                 shot = null; // Ігноруємо, якщо клітинка вже обстріляна згідно з GameLogic
             }
 
@@ -69,13 +69,14 @@ public class AIStrategy {
 
         if (shot != null && isValidCell(shot[0], shot[1]) && !isAlreadyShot(shot[0], shot[1]) && !isMissSymbol(playerButtons, shot[0], shot[1])) {
             markAsShot(shot[0], shot[1]);
-            System.out.println("AI selected shot: row=" + shot[0] + ", col=" + shot[1]);
             return shot;
         }
-        System.out.println("AI could not find a valid shot after " + maxAttempts + " attempts");
         return null;
     }
 
+    /*
+    Методи вибору пострілу:
+     */
     private int[] getRandomShot() {
         if (availableShots.isEmpty()) {
             return null;
@@ -140,6 +141,7 @@ public class AIStrategy {
         return getHuntShot();
     }
 
+    // реакція на результат пострілу
     public void processShotResult(int[] coordinates, boolean hit, boolean sunk) {
         int row = coordinates[0];
         int col = coordinates[1];
@@ -164,8 +166,19 @@ public class AIStrategy {
                 currentMode = inLine ? Mode.TARGET : Mode.HUNT;
             }
         } else if (sunk) {
-            // Після потоплення корабля виключаємо сусідні клітинки
-            markSurroundingCellsAsShot();
+            for (int[] h : hits) {
+                int r = h[0];
+                int c = h[1];
+                for (int dr = -1; dr <= 1; dr++) {
+                    for (int dc = -1; dc <= 1; dc++) {
+                        int newRow = r + dr;
+                        int newCol = c + dc;
+                        if (isValidCell(newRow, newCol) && !isAlreadyShot(newRow, newCol)) {
+                            markAsShot(newRow, newCol);
+                        }
+                    }
+                }
+            }
             hits.clear();
             currentMode = Mode.RANDOM;
         } else {
@@ -177,64 +190,48 @@ public class AIStrategy {
         }
     }
 
-    private void markSurroundingCellsAsShot() {
-        for (int[] hit : hits) {
-            int row = hit[0];
-            int col = hit[1];
-            // Перевіряємо всі сусідні клітинки (включаючи діагоналі)
-            for (int dr = -1; dr <= 1; dr++) {
-                for (int dc = -1; dc <= 1; dc++) {
-                    int newRow = row + dr;
-                    int newCol = col + dc;
-                    if (isValidCell(newRow, newCol) && !isAlreadyShot(newRow, newCol)) {
-                        markAsShot(newRow, newCol);
-                        System.out.println("Marked surrounding cell as shot: row=" + newRow + ", col=" + newCol);
-                    }
-                }
-            }
-        }
-    }
-
+    // оновлює список доступних клітинок у які комп'ютер може стріляти
     private void updateAvailableShots(ShipButton[][] playerButtons) {
         availableShots.clear();
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 if (playerButtons[i][j] != null && !isAlreadyShot(i, j) && !isMissSymbol(playerButtons, i, j)) {
-                    // Додаткова перевірка через GameLogic, якщо він доступний
-                    if (gameLogic == null || (!gameLogic.isComputerShotAt(i, j) && gameLogic.isCellAvailableForShot(i, j))) {
+                    if (gameLogic == null || (!gameLogic.boardManager.isComputerShotAt(i, j) && gameLogic.isCellAvailableForShot(i, j))) {
                         availableShots.add(new int[]{i, j});
                     }
                 }
             }
         }
-        if (availableShots.isEmpty()) {
-            System.out.println("No available shots for computer after filtering!");
-        }
+
     }
 
+    // перевіряє чи є в клітинці символ, який позначає промах
     private boolean isMissSymbol(ShipButton[][] playerButtons, int row, int col) {
         ShipButton button = playerButtons[row][col];
         return button != null && "•".equals(button.getText());
     }
 
+    // перевіряє чи в клітинку вже попадали
     private boolean isAlreadyShot(int row, int col) {
         return targetedArea[row][col] == 1;
     }
 
+    // позначає клітинку як обістрялну
     private void markAsShot(int row, int col) {
         if (isValidCell(row, col)) {
             targetedArea[row][col] = 1;
-            // Синхронізуємо з GameLogic, якщо він доступний
             if (gameLogic != null) {
                 gameLogic.markComputerShot(row, col);
             }
         }
     }
 
+    // перевірка чи належить координата ігровому полю
     private boolean isValidCell(int row, int col) {
         return row >= 1 && row <= 10 && col >= 1 && col <= 10;
     }
 
+    // скиадє стан бота перед початком нової гри
     public void reset() {
         hits.clear();
         currentMode = Mode.RANDOM;
