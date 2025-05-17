@@ -41,7 +41,7 @@ public class ShipPlacer {
 
     // 🔹 Повертає список кораблів стандартної конфігурації
     private List<Ship> createShipList() {
-        List<org.seabattlepp.ships.Ship> ships = new ArrayList<>();
+        List<Ship> ships = new ArrayList<>();
 
         ships.add(new Ship(5));
         ships.add(new Ship(4));
