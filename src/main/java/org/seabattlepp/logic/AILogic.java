@@ -180,13 +180,13 @@ class AIStrategy {
     }
 
     // Оновлений конструктор для передачі GameLogic
-    public AIStrategy(GameLogic gameLogic) {
-        this.gameLogic = gameLogic;
-    }
-
-    public AIStrategy() {
-        this(null); // Конструктор без параметрів для сумісності
-    }
+//    public AIStrategy(GameLogic gameLogic) {
+//        this.gameLogic = gameLogic;
+//    }
+//
+//    public AIStrategy() {
+//        this(null); // Конструктор без параметрів для сумісності
+//    }
 
     // метод для вибору пострілу
     public int[] chooseShot(ShipButton[][] playerButtons) {
