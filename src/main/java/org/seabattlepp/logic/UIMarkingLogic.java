@@ -111,7 +111,7 @@ public class UIMarkingLogic {
         ShipButton button = gameLogic.boardManager.computerShipButtons[row][col];
         if (button != null && button.isEnabled()) {
             markMissSymbol(button);
-            markPlayerShot(row, col); // Mark as shot in playerTargetedArea
+            markPlayerShot(row, col);
         }
     }
 
@@ -244,7 +244,7 @@ public class UIMarkingLogic {
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
                         if (gameLogic.boardManager.computerShipsLocations[adjacentRow][adjacentCol] == null && gameLogic.boardManager.computerShipButtons[adjacentRow][adjacentCol] != null) {
                             markMissSymbol(gameLogic.boardManager.computerShipButtons[adjacentRow][adjacentCol]);
-                            markPlayerShot(adjacentRow, adjacentCol); // Mark as shot in playerTargetedArea
+                            markPlayerShot(adjacentRow, adjacentCol);
                             markedCells.add(cellKey);
                         }
                     }
@@ -272,7 +272,7 @@ public class UIMarkingLogic {
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
                         if (gameLogic.boardManager.playerShipsLocations[adjacentRow][adjacentCol] == null && gameLogic.boardManager.playerShipButtons[adjacentRow][adjacentCol] != null) {
                             markMissSymbol(gameLogic.boardManager.playerShipButtons[adjacentRow][adjacentCol]);
-                            markComputerShot(adjacentRow, adjacentCol); // Mark as shot in computerTargetedArea
+                            markComputerShot(adjacentRow, adjacentCol);
                             markedCells.add(cellKey);
                         }
                     }

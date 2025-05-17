@@ -157,8 +157,8 @@ public class GameLogic {
         aiLogic.startComputerTurn();
     }
 
-    public void checkGameEnd() {
-        if (isGameEnded) return;
+    public boolean checkGameEnd() {
+        if (isGameEnded) return false;
 
         boolean playerSunk = true;
         for (int i = 1; i <= 10; i++) {
@@ -172,7 +172,7 @@ public class GameLogic {
         }
         if (playerSunk) {
             endGame(false);
-            return;
+            return playerSunk;
         }
 
         boolean computerSunk = true;
@@ -188,6 +188,7 @@ public class GameLogic {
         if (computerSunk) {
             endGame(true);
         }
+        return playerSunk;
     }
 
     private void endGame(boolean playerWon) {
