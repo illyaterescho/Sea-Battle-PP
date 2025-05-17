@@ -19,13 +19,6 @@ public class AILogic {
         this.gameLogic = gameLogic;
         this.playerShipButtons = playerShipButtons;
         this.aiStrategy = new AIStrategy();
-        for (int i = 1; i <= 10; i++) {
-            for (int j = 1; j <= 10; j++) {
-                if (playerShipButtons[i][j] == null) {
-                    System.err.println("Warning: playerShipButtons[" + i + "][" + j + "] is null");
-                }
-            }
-        }
     }
 
     public void resetBot() {
@@ -87,13 +80,6 @@ public class AILogic {
                     playerShipButtons[coordinates[0]][coordinates[1]].getText() : "null";
 
             if (!isAvailable || !isNotShot || "•".equals(cellText)) {
-                if ("•".equals(cellText)) {
-                    System.out.println("Computer skipped shot at row=" + coordinates[0] + ", col=" + coordinates[1] +
-                            " (symbol '•' found), choosing another cell at " + new java.util.Date());
-                } else if (!isNotShot) {
-                    System.out.println("Computer skipped shot at row=" + coordinates[0] + ", col=" + coordinates[1] +
-                            " (cell already shot), choosing another cell at " + new java.util.Date());
-                }
                 coordinates = null; // Скидаємо координати для нової спроби
                 continue;
             }
@@ -110,7 +96,6 @@ public class AILogic {
     // виконує постріл комп'ютера в гравця
     public boolean processComputerShot(int row, int col) {
         if (!isValidCell(row, col)) {
-            System.err.println("Invalid shot coordinates: row=" + row + ", col=" + col + " at " + new java.util.Date());
             return false;
         }
 
@@ -123,7 +108,6 @@ public class AILogic {
 
         ShipButton button = playerShipButtons[row][col];
         if (button == null) {
-            System.err.println("Button is null at row=" + row + ", col=" + col + " at " + new java.util.Date());
             return false;
         }
 
@@ -179,14 +163,6 @@ class AIStrategy {
         RANDOM, HUNT, TARGET
     }
 
-    // Оновлений конструктор для передачі GameLogic
-//    public AIStrategy(GameLogic gameLogic) {
-//        this.gameLogic = gameLogic;
-//    }
-//
-//    public AIStrategy() {
-//        this(null); // Конструктор без параметрів для сумісності
-//    }
 
     // метод для вибору пострілу
     public int[] chooseShot(ShipButton[][] playerButtons) {

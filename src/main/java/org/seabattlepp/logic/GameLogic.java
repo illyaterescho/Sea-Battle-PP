@@ -138,8 +138,6 @@ public class GameLogic {
                             processPlayerShot(row, col);
                         }
                     });
-                } else {
-                    System.err.println("Button is null at computerShipButtons[" + row + "][" + col + "]");
                 }
             }
         }
