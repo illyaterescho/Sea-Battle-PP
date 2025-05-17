@@ -1,7 +1,6 @@
 package org.seabattlepp.logic;
 
 import java.awt.*;
-
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.util.List;
 
@@ -15,11 +14,11 @@ public class BoardManager {
     public Ship[][] computerShipsLocations;
     public Ship[][] playerShipsLocations;
     // кнопки gui, що відповідають клітинкам на полі
-    public final ShipButton[][] computerShipButtons;
-    public final ShipButton[][] playerShipButtons;
+    public ShipButton[][] computerShipButtons;
+    public ShipButton[][] playerShipButtons;
     // масиви які зберігають історію пострілів
-    public final int[][] playerTargetedArea;
-    public final int[][] computerTargetedArea;
+    public int[][] playerTargetedArea;
+    public int[][] computerTargetedArea;
     public boolean isRandomButtonPressed;
 
     public BoardManager(ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
@@ -189,6 +188,22 @@ public class BoardManager {
         playerShipsLocations = new Ship[11][11];
     }
 
+    public void updateComputerShotRecord(int row, int col) {
+        if (isValidCell(row, col)) {
+            computerTargetedArea[row][col] = 1;
+        }
+    }
+
+    public void updatePlayerShotRecord(int row, int col) {
+        if (isValidCell(row, col)) {
+            playerTargetedArea[row][col] = 1;
+        }
+    }
+
+    private boolean isValidCell(int row, int col) {
+        return row >= 1 && row <= 10 && col >= 1 && col <= 10;
+    }
+
     /*
     Доп методи по перевірці на постріл:
      */
@@ -198,5 +213,17 @@ public class BoardManager {
 
     public boolean isComputerShotAt(int row, int col) {
         return computerTargetedArea[row][col] == 1;
+    }
+
+    public boolean isCellAvailableForShot(int row, int col) {
+        ShipButton button = playerShipButtons[row][col];
+        if (button != null) {
+            String text = button.getText();
+            if ("•".equals(text)) {
+                return false;
+            }
+            return button.getIcon() == null;
+        }
+        return false;
     }
 }

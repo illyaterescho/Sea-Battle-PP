@@ -75,7 +75,7 @@ public class MainFrame extends JFrame {
 
         // 3️⃣ Створюємо логіку гри
         boardManager = new BoardManager(boardPanel.computerShipButtons, boardPanel.playerShipButtons);
-        aiLogic = new AILogic(this, boardPanel.playerShipButtons);
+        aiLogic = new AILogic(this);
         uiMarkingLogic = new UIMarkingLogic(this);
         gameLogic = new GameLogic(this);
 

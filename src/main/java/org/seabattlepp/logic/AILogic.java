@@ -13,12 +13,10 @@ public class AILogic {
 
     private final AIStrategy aiStrategy;
     public  MainFrame mainFrame;
-    private final ShipButton[][] playerShipButtons;
     private Timer timer; // Поле для Timer
 
-    public AILogic(MainFrame mainFrame, ShipButton[][] playerShipButtons) {
+    public AILogic(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        this.playerShipButtons = playerShipButtons;
         this.aiStrategy = new AIStrategy();
     }
 
@@ -68,17 +66,17 @@ public class AILogic {
         final int MAX_ATTEMPTS = 100;
 
         do {
-            coordinates = aiStrategy.chooseShot(playerShipButtons);
+            coordinates = aiStrategy.chooseShot(mainFrame.boardManager.playerShipButtons);
             attempts++;
             if (coordinates == null || attempts > MAX_ATTEMPTS) {
                 return null;
             }
 
             // Перевіряємо, чи клітинка доступна через GameLogic
-            boolean isAvailable = mainFrame.gameLogic.isCellAvailableForShot(coordinates[0], coordinates[1]);
+            boolean isAvailable = mainFrame.boardManager.isCellAvailableForShot(coordinates[0], coordinates[1]);
             boolean isNotShot = !mainFrame.boardManager.isComputerShotAt(coordinates[0], coordinates[1]);
-            String cellText = playerShipButtons[coordinates[0]][coordinates[1]] != null ?
-                    playerShipButtons[coordinates[0]][coordinates[1]].getText() : "null";
+            String cellText = mainFrame.boardManager.playerShipButtons[coordinates[0]][coordinates[1]] != null ?
+                    mainFrame.boardManager.playerShipButtons[coordinates[0]][coordinates[1]].getText() : "null";
 
             if (!isAvailable || !isNotShot || "•".equals(cellText)) {
                 coordinates = null; // Скидаємо координати для нової спроби
@@ -107,13 +105,13 @@ public class AILogic {
             return false;
         }
 
-        ShipButton button = playerShipButtons[row][col];
+        ShipButton button = mainFrame.boardManager.playerShipButtons[row][col];
         if (button == null) {
             return false;
         }
 
         // Додаткова перевірка перед пострілом
-        if (!mainFrame.gameLogic.isCellAvailableForShot(row, col) || mainFrame.boardManager.isComputerShotAt(row, col)) {
+        if (!mainFrame.boardManager.isCellAvailableForShot(row, col) || mainFrame.boardManager.isComputerShotAt(row, col)) {
             if (!mainFrame.gameLogic.isGameEnded) {
                 startComputerTurn(); // Повторна спроба лише якщо гра не закінчена
             }
@@ -125,9 +123,9 @@ public class AILogic {
         boolean sunk = false;
 
         if (hit) {
-            sunk = mainFrame.uiMarkingLogic.markHitPlayerBoard(row, col, ship);
+            sunk = mainFrame.uiMarkingLogic.markPlayerBoardHit(row, col, ship);
         } else {
-            mainFrame.uiMarkingLogic.markMissPlayerBoard(row, col);
+            mainFrame.uiMarkingLogic.markPlayerBoardMiss(row, col);
         }
 
         aiStrategy.processShotResult(new int[]{row, col}, hit, sunk);
@@ -339,7 +337,7 @@ class AIStrategy {
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 if (playerButtons[i][j] != null && !isAlreadyShot(i, j) && !isMissSymbol(playerButtons, i, j)) {
-                    if (gameLogic == null || (!mainFrame.boardManager.isComputerShotAt(i, j) && gameLogic.isCellAvailableForShot(i, j))) {
+                    if (gameLogic == null || (!mainFrame.boardManager.isComputerShotAt(i, j) && mainFrame.boardManager.isCellAvailableForShot(i, j))) {
                         availableShots.add(new int[]{i, j});
                     }
                 }
