@@ -2,8 +2,11 @@ package org.seabattlepp.gui;
 
 import javax.swing.*;
 import java.awt.*;
+
+import org.seabattlepp.logic.AILogic;
 import org.seabattlepp.logic.GameLogic;
 import org.seabattlepp.logic.BoardManager;
+import org.seabattlepp.logic.UIMarkingLogic;
 
 public class MainFrame extends JFrame {
 
@@ -18,7 +21,11 @@ public class MainFrame extends JFrame {
     public ButtonPanel buttonPanel;
 
     // 🔷 Логіка гри
-    private final GameLogic gameLogic;
+    public GameLogic gameLogic;
+    public BoardManager boardManager;
+    public UIMarkingLogic uiMarkingLogic;
+    public AILogic aiLogic;
+
 
     public MainFrame() {
         setTitle("Морський Бій");
@@ -67,16 +74,18 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
 
         // 3️⃣ Створюємо логіку гри
-        gameLogic = new GameLogic(this, boardPanel.computerShipButtons, boardPanel.playerShipButtons);
+        boardManager = new BoardManager(boardPanel.computerShipButtons, boardPanel.playerShipButtons);
+        aiLogic = new AILogic(this, boardPanel.playerShipButtons);
+        uiMarkingLogic = new UIMarkingLogic(this);
+        gameLogic = new GameLogic(this);
 
         // 🌀 Налаштування кнопки "Рандом"
         if (randomButton != null) {
             randomButton.setEnabled(false); // Деактивована до початку гри
             randomButton.addActionListener(e -> {
-                gameLogic.boardManager.placeShipsRandomlyOnLeftBoard();
-                gameLogic.boardManager.enableShootingAfterRandom();
+                boardManager.placeShipsRandomlyOnLeftBoard();
+                boardManager.enableShootingAfterRandom();
                 randomButton.setEnabled(true);
-                System.out.println("Random button clicked: ships placed and shooting enabled");
             });
         }
 
@@ -84,7 +93,7 @@ public class MainFrame extends JFrame {
         if (startButton != null) {
             startButton.addActionListener(e -> {
                 if (!gameLogic.isGameStarted) {
-                    gameLogic.boardManager.placeShipsRandomlyOnRightBoard(); // Комп'ютер розставляє кораблі
+                    boardManager.placeShipsRandomlyOnRightBoard(); // Комп'ютер розставляє кораблі
                     if (randomButton != null) {
                         randomButton.setEnabled(true);  // Активуємо "Рандом" для гравця
                     }

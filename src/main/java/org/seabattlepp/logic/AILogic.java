@@ -1,5 +1,6 @@
 package org.seabattlepp.logic;
 
+import org.seabattlepp.gui.MainFrame;
 import org.seabattlepp.gui.ShipButton;
 import org.seabattlepp.ships.Ship;
 
@@ -11,12 +12,12 @@ import java.util.Random;
 public class AILogic {
 
     private final AIStrategy aiStrategy;
-    private final GameLogic gameLogic;
+    public  MainFrame mainFrame;
     private final ShipButton[][] playerShipButtons;
     private Timer timer; // Поле для Timer
 
-    public AILogic(GameLogic gameLogic, ShipButton[][] playerShipButtons) {
-        this.gameLogic = gameLogic;
+    public AILogic(MainFrame mainFrame, ShipButton[][] playerShipButtons) {
+        this.mainFrame = mainFrame;
         this.playerShipButtons = playerShipButtons;
         this.aiStrategy = new AIStrategy();
     }
@@ -30,16 +31,16 @@ public class AILogic {
 
     // точка входу в хід комп'ютера
     public void startComputerTurn() {
-        if (!gameLogic.isGameStarted || gameLogic.isGameEnded) {
+        if (!mainFrame.gameLogic.isGameStarted || mainFrame.gameLogic.isGameEnded) {
         }
-        gameLogic.setPlayerTurn(false);
-        gameLogic.boardManager.disableComputerButtons();
-        gameLogic.boardManager.disablePlayerButtons();
+        mainFrame.gameLogic.setPlayerTurn(false);
+        mainFrame.boardManager.disableComputerButtons();
+        mainFrame.boardManager.disablePlayerButtons();
 
         int[] shotCoordinates = getValidShotCoordinates();
 
         if (shotCoordinates == null) {
-            gameLogic.startPlayerTurn();
+            mainFrame.gameLogic.startPlayerTurn();
             return;
         }
 
@@ -49,10 +50,10 @@ public class AILogic {
 
         timer = new Timer(1000, e -> {
             boolean hit = processComputerShot(shotCoordinates[0], shotCoordinates[1]);
-            if (!hit && !gameLogic.isGameEnded) {
-                gameLogic.setPlayerTurn(true);
-                gameLogic.boardManager.enableComputerButtons();
-            } else if (hit && gameLogic.isGameStarted && !gameLogic.isGameEnded && !gameLogic.isPlayerTurn) {
+            if (!hit && !mainFrame.gameLogic.isGameEnded) {
+                mainFrame.gameLogic.setPlayerTurn(true);
+                mainFrame.boardManager.enableComputerButtons();
+            } else if (hit && mainFrame.gameLogic.isGameStarted && !mainFrame.gameLogic.isGameEnded && !mainFrame.gameLogic.isPlayerTurn) {
                 startComputerTurn();
             }
         });
@@ -74,8 +75,8 @@ public class AILogic {
             }
 
             // Перевіряємо, чи клітинка доступна через GameLogic
-            boolean isAvailable = gameLogic.isCellAvailableForShot(coordinates[0], coordinates[1]);
-            boolean isNotShot = !gameLogic.boardManager.isComputerShotAt(coordinates[0], coordinates[1]);
+            boolean isAvailable = mainFrame.gameLogic.isCellAvailableForShot(coordinates[0], coordinates[1]);
+            boolean isNotShot = !mainFrame.boardManager.isComputerShotAt(coordinates[0], coordinates[1]);
             String cellText = playerShipButtons[coordinates[0]][coordinates[1]] != null ?
                     playerShipButtons[coordinates[0]][coordinates[1]].getText() : "null";
 
@@ -99,7 +100,7 @@ public class AILogic {
             return false;
         }
 
-        if (gameLogic.isGameEnded) {
+        if (mainFrame.gameLogic.isGameEnded) {
             if (timer != null) {
                 timer.stop();
             }
@@ -112,27 +113,27 @@ public class AILogic {
         }
 
         // Додаткова перевірка перед пострілом
-        if (!gameLogic.isCellAvailableForShot(row, col) || gameLogic.boardManager.isComputerShotAt(row, col)) {
-            if (!gameLogic.isGameEnded) {
+        if (!mainFrame.gameLogic.isCellAvailableForShot(row, col) || mainFrame.boardManager.isComputerShotAt(row, col)) {
+            if (!mainFrame.gameLogic.isGameEnded) {
                 startComputerTurn(); // Повторна спроба лише якщо гра не закінчена
             }
             return false;
         }
 
-        Ship ship = gameLogic.boardManager.playerShipsLocations[row][col];
+        Ship ship = mainFrame.boardManager.playerShipsLocations[row][col];
         boolean hit = ship != null;
         boolean sunk = false;
 
         if (hit) {
-            sunk = gameLogic.uiMarkingLogic.markHitPlayerBoard(row, col, ship);
+            sunk = mainFrame.uiMarkingLogic.markHitPlayerBoard(row, col, ship);
         } else {
-            gameLogic.uiMarkingLogic.markMissPlayerBoard(row, col);
+            mainFrame.uiMarkingLogic.markMissPlayerBoard(row, col);
         }
 
         aiStrategy.processShotResult(new int[]{row, col}, hit, sunk);
 
-        if (sunk && !gameLogic.isGameEnded) {
-            gameLogic.checkGameEnd();
+        if (sunk && !mainFrame.gameLogic.isGameEnded) {
+            mainFrame.gameLogic.checkGameEnd();
         }
         return hit;
     }
@@ -158,11 +159,17 @@ class AIStrategy {
     private final int[][] targetedArea = new int[11][11];
     private final List<int[]> availableShots = new ArrayList<>();
     private GameLogic gameLogic;
+    private MainFrame mainFrame;
 
     public enum Mode {
         RANDOM, HUNT, TARGET
     }
 
+    public AIStrategy(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
+    }
+
+    public AIStrategy() {}
 
     // метод для вибору пострілу
     public int[] chooseShot(ShipButton[][] playerButtons) {
@@ -196,7 +203,7 @@ class AIStrategy {
             }
 
             // Додаткова перевірка через GameLogic, якщо він доступний
-            if (shot != null && gameLogic != null && gameLogic.boardManager.isComputerShotAt(shot[0], shot[1])) {
+            if (shot != null && gameLogic != null && mainFrame.boardManager.isComputerShotAt(shot[0], shot[1])) {
                 shot = null; // Ігноруємо, якщо клітинка вже обстріляна згідно з GameLogic
             }
 
@@ -332,7 +339,7 @@ class AIStrategy {
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
                 if (playerButtons[i][j] != null && !isAlreadyShot(i, j) && !isMissSymbol(playerButtons, i, j)) {
-                    if (gameLogic == null || (!gameLogic.boardManager.isComputerShotAt(i, j) && gameLogic.isCellAvailableForShot(i, j))) {
+                    if (gameLogic == null || (!mainFrame.boardManager.isComputerShotAt(i, j) && gameLogic.isCellAvailableForShot(i, j))) {
                         availableShots.add(new int[]{i, j});
                     }
                 }
@@ -358,7 +365,7 @@ class AIStrategy {
             targetedArea[row][col] = 1;
             if (gameLogic != null) {
                 if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
-                    gameLogic.boardManager.computerTargetedArea[row][col] = 1;
+                    mainFrame.boardManager.computerTargetedArea[row][col] = 1;
                 }
             }
         }

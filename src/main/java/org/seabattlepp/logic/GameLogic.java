@@ -8,43 +8,37 @@ import org.seabattlepp.gui.MainFrame;
 
 public class GameLogic {
 
-    private final MainFrame mainFrame;
-    public BoardManager boardManager;
+    public MainFrame mainFrame;
     public boolean isGameStarted;
     public boolean isPlayerTurn;
-    public AILogic aiLogic;
-    public UIMarkingLogic uiMarkingLogic;
     public boolean isGameEnded;
 
-    public GameLogic(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
+    public GameLogic(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        this.boardManager = new BoardManager(computerShipButtons, playerShipButtons);
-        this.aiLogic = new AILogic(this, boardManager.playerShipButtons);
-        this.uiMarkingLogic = new UIMarkingLogic(this);
         this.isPlayerTurn = true;
         this.isGameStarted = false;
         this.isGameEnded = false;
-        boardManager.resetComputerShipsLocations();
-        boardManager.resetPlayerShipsLocations();
+        mainFrame.boardManager.resetComputerShipsLocations();
+        mainFrame.boardManager.resetPlayerShipsLocations();
     }
 
     public void resetBoards() {
-        boardManager.clearLeftBoardShips();
-        boardManager.clearRightBoardShips();
+        mainFrame.boardManager.clearLeftBoardShips();
+        mainFrame.boardManager.clearRightBoardShips();
         isGameStarted = false;
-        boardManager.isRandomButtonPressed = false;
-        boardManager.resetComputerShipsLocations();
-        boardManager.resetPlayerShipsLocations();
-        aiLogic.resetBot();
+        mainFrame.boardManager.isRandomButtonPressed = false;
+        mainFrame.boardManager.resetComputerShipsLocations();
+        mainFrame.boardManager.resetPlayerShipsLocations();
+        mainFrame.aiLogic.resetBot();
         isPlayerTurn = true;
-        boardManager.isRandomButtonPressed = false;
+        mainFrame.boardManager.isRandomButtonPressed = false;
         for (int i = 0; i <= 10; i++) {
             for (int j = 0; j <= 10; j++) {
-                boardManager.playerTargetedArea[i][j] = 0;
-                boardManager.computerTargetedArea[i][j] = 0;
+                mainFrame.boardManager.playerTargetedArea[i][j] = 0;
+                mainFrame.boardManager.computerTargetedArea[i][j] = 0;
             }
         }
-        boardManager.disableComputerButtons();
+        mainFrame.boardManager.disableComputerButtons();
     }
 
     public void setPlayerTurn(boolean playerTurn) {
@@ -54,38 +48,38 @@ public class GameLogic {
     public void processPlayerShot(int row, int col) {
         if (!isPlayerTurn || isGameEnded) return;
 
-        if (!boardManager.isRandomButtonPressed) {
+        if (!mainFrame.boardManager.isRandomButtonPressed) {
             return;
         }
 
-        if (boardManager.isPlayerShotAt(row, col)) {
+        if (mainFrame.boardManager.isPlayerShotAt(row, col)) {
             return;
         }
 
         if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
-            boardManager.playerTargetedArea[row][col] = 1;
+            mainFrame.boardManager.playerTargetedArea[row][col] = 1;
         }
 
-        Ship ship = boardManager.computerShipsLocations[row][col];
+        Ship ship = mainFrame.boardManager.computerShipsLocations[row][col];
         boolean hit = ship != null;
         boolean sunk = false;
 
         if (hit) {
-            sunk = uiMarkingLogic.markHit(row, col, ship);
+            sunk = mainFrame.uiMarkingLogic.markHit(row, col, ship);
             checkGameEnd();
         } else {
-            if (boardManager.computerShipButtons[row][col] != null) {
-                uiMarkingLogic.markMiss(row, col);
+            if (mainFrame.boardManager.computerShipButtons[row][col] != null) {
+                mainFrame.uiMarkingLogic.markMiss(row, col);
             }
             setPlayerTurn(false);
-            boardManager.disableComputerButtons();
-            boardManager.enablePlayerButtons();
+            mainFrame.boardManager.disableComputerButtons();
+            mainFrame.boardManager.enablePlayerButtons();
             if (isGameStarted && !isGameEnded) {
                 this.startComputerTurn();
             }
         }
 
-        ShipButton button = boardManager.computerShipButtons[row][col];
+        ShipButton button = mainFrame.boardManager.computerShipButtons[row][col];
         if (button != null) {
             button.setEnabled(false);
         }
@@ -96,7 +90,7 @@ public class GameLogic {
         }
 
         if (hit && !sunk && isGameStarted && !isGameEnded) {
-            boardManager.enableComputerButtons();
+            mainFrame.boardManager.enableComputerButtons();
         }
     }
 
@@ -106,7 +100,7 @@ public class GameLogic {
         if (mainFrame.randomButton != null) {
             mainFrame.randomButton.setEnabled(true);
         }
-        boardManager.isRandomButtonPressed = false;
+        mainFrame.boardManager.isRandomButtonPressed = false;
     }
 
     public void startGame() {
@@ -115,9 +109,9 @@ public class GameLogic {
         }
         isPlayerTurn = true;
         setGameStarted(true);
-        boardManager.disableComputerButtons();
-        boardManager.disablePlayerButtons();
-        aiLogic.resetBot();
+        mainFrame.boardManager.disableComputerButtons();
+        mainFrame.boardManager.disablePlayerButtons();
+        mainFrame.aiLogic.resetBot();
         if (mainFrame.randomButton != null) {
             mainFrame.randomButton.setEnabled(true);
         }
@@ -126,7 +120,7 @@ public class GameLogic {
             for (int j = 1; j <= 10; j++) {
                 int row = i;
                 int col = j;
-                ShipButton button = boardManager.computerShipButtons[row][col];
+                ShipButton button = mainFrame.boardManager.computerShipButtons[row][col];
 
                 if (button != null) {
                     for (var l : button.getActionListeners()) {
@@ -152,7 +146,7 @@ public class GameLogic {
 
     public void startComputerTurn() {
         if (isGameEnded) return;
-        aiLogic.startComputerTurn();
+        mainFrame.aiLogic.startComputerTurn();
     }
 
     public boolean checkGameEnd() {
@@ -161,7 +155,7 @@ public class GameLogic {
         boolean playerSunk = true;
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
-                if (boardManager.playerShipsLocations[i][j] != null && !boardManager.playerShipsLocations[i][j].isSunk()) {
+                if (mainFrame.boardManager.playerShipsLocations[i][j] != null && !mainFrame.boardManager.playerShipsLocations[i][j].isSunk()) {
                     playerSunk = false;
                     break;
                 }
@@ -176,7 +170,7 @@ public class GameLogic {
         boolean computerSunk = true;
         for (int i = 1; i <= 10; i++) {
             for (int j = 1; j <= 10; j++) {
-                if (boardManager.computerShipsLocations[i][j] != null && !boardManager.computerShipsLocations[i][j].isSunk()) {
+                if (mainFrame.boardManager.computerShipsLocations[i][j] != null && !mainFrame.boardManager.computerShipsLocations[i][j].isSunk()) {
                     computerSunk = false;
                     break;
                 }
@@ -202,16 +196,16 @@ public class GameLogic {
             if (mainFrame.startButton != null) {
                 mainFrame.startButton.setEnabled(true);
             }
-            aiLogic.stopTimer();
+            mainFrame.aiLogic.stopTimer();
             resetBoards();
-            aiLogic.resetBot();
+            mainFrame.aiLogic.resetBot();
             isGameEnded = false;
         });
     }
 
 
     public boolean isCellAvailableForShot(int row, int col) {
-        ShipButton button = boardManager.playerShipButtons[row][col];
+        ShipButton button = mainFrame.boardManager.playerShipButtons[row][col];
         if (button != null) {
             String text = button.getText();
             if ("•".equals(text)) {
