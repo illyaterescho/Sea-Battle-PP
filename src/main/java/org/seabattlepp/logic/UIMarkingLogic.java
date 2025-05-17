@@ -111,15 +111,19 @@ public class UIMarkingLogic {
         ShipButton button = gameLogic.boardManager.computerShipButtons[row][col];
         if (button != null && button.isEnabled()) {
             markMissSymbol(button);
-            gameLogic.markPlayerShot(row, col); // Mark as shot in playerTargetedArea
+            markPlayerShot(row, col); // Mark as shot in playerTargetedArea
         }
     }
 
-    public void markMissPlayerBoard(int row, int col) {
-        ShipButton button = gameLogic.boardManager.playerShipButtons[row][col];
-        if (button != null) {
-            markMissSymbol(button);
-            gameLogic.markComputerShot(row, col); // Mark as shot in computerTargetedArea
+    public void markComputerShot(int row, int col) {
+        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
+            gameLogic.boardManager.computerTargetedArea[row][col] = 1;
+        }
+    }
+
+    public void markPlayerShot(int row, int col) {
+        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
+            gameLogic.boardManager.playerTargetedArea[row][col] = 1;
         }
     }
 
@@ -127,6 +131,74 @@ public class UIMarkingLogic {
         button.setEnabled(false);
         button.setOpaque(false);
         markMissUI(button);
+    }
+
+
+    public boolean markHit(int row, int col, Ship ship) {
+        boolean sunk = false;
+        if (gameLogic.boardManager.computerShipButtons[row][col] != null) {
+            ship.takeHit();
+            sunk = ship.isSunk();
+            if (sunk) {
+                markSunkShip(ship);
+            } else {
+                markHitSymbol(gameLogic.boardManager.computerShipButtons[row][col]);
+            }
+        }
+        return sunk;
+    }
+
+    public boolean markHitPlayerBoard(int row, int col, Ship ship) {
+        if (gameLogic.isGameEnded || !gameLogic.isCellAvailableForShot(row, col) || gameLogic.boardManager.isComputerShotAt(row, col)) {
+            return false;
+        }
+
+        markComputerShot(row, col);
+
+        boolean sunk = false;
+        if (gameLogic.boardManager.playerShipButtons[row][col] != null) {
+            ship.takeHit();
+            sunk = ship.isSunk();
+            if (sunk) {
+                markSunkShipPlayerBoard(ship);
+                for (int[] coord : ship.getCoordinates()) {
+                    int r = coord[0];
+                    int c = coord[1];
+                    for (int dr = -1; dr <= 1; dr++) {
+                        for (int dc = -1; dc <= 1; dc++) {
+                            int newRow = r + dr;
+                            int newCol = c + dc;
+                            if (newRow >= 1 && newRow <= 10 && newCol >= 1 && newCol <= 10 && !gameLogic.boardManager.isComputerShotAt(newRow, newCol)) {
+                                markComputerShot(newRow, newCol);
+                            }
+                        }
+                    }
+                }
+                gameLogic.checkGameEnd();
+                if (gameLogic.isGameEnded) {
+                    gameLogic.aiLogic.stopTimer();
+                }
+            } else {
+                markHitSymbolPlayerBoard(gameLogic.boardManager.playerShipButtons[row][col]);
+            }
+        }
+        return sunk;
+    }
+
+    public void markMissPlayerBoard(int row, int col) {
+        if (gameLogic.isGameEnded || !gameLogic.isCellAvailableForShot(row, col) || gameLogic.boardManager.isComputerShotAt(row, col)) {
+            return;
+        }
+
+        markComputerShot(row, col);
+
+        if (gameLogic.boardManager.playerShipButtons[row][col] != null) {
+            ShipButton button = gameLogic.boardManager.playerShipButtons[row][col];
+            if (button != null) {
+                markMissSymbol(button);
+                markComputerShot(row, col);
+            }
+        }
     }
 
     private void markMissUI(ShipButton button) {
@@ -172,7 +244,7 @@ public class UIMarkingLogic {
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
                         if (gameLogic.boardManager.computerShipsLocations[adjacentRow][adjacentCol] == null && gameLogic.boardManager.computerShipButtons[adjacentRow][adjacentCol] != null) {
                             markMissSymbol(gameLogic.boardManager.computerShipButtons[adjacentRow][adjacentCol]);
-                            gameLogic.markPlayerShot(adjacentRow, adjacentCol); // Mark as shot in playerTargetedArea
+                            markPlayerShot(adjacentRow, adjacentCol); // Mark as shot in playerTargetedArea
                             markedCells.add(cellKey);
                         }
                     }
@@ -200,7 +272,7 @@ public class UIMarkingLogic {
                     if (isValidCell(adjacentRow, adjacentCol) && !markedCells.contains(cellKey)) {
                         if (gameLogic.boardManager.playerShipsLocations[adjacentRow][adjacentCol] == null && gameLogic.boardManager.playerShipButtons[adjacentRow][adjacentCol] != null) {
                             markMissSymbol(gameLogic.boardManager.playerShipButtons[adjacentRow][adjacentCol]);
-                            gameLogic.markComputerShot(adjacentRow, adjacentCol); // Mark as shot in computerTargetedArea
+                            markComputerShot(adjacentRow, adjacentCol); // Mark as shot in computerTargetedArea
                             markedCells.add(cellKey);
                         }
                     }

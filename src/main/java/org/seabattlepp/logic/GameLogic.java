@@ -12,8 +12,8 @@ public class GameLogic {
     public BoardManager boardManager;
     public boolean isGameStarted;
     public boolean isPlayerTurn;
-    private final AILogic aiLogic;
-    private final UIMarkingLogic uiMarkingLogic;
+    public AILogic aiLogic;
+    public UIMarkingLogic uiMarkingLogic;
     public boolean isGameEnded;
 
     public GameLogic(MainFrame mainFrame, ShipButton[][] computerShipButtons, ShipButton[][] playerShipButtons) {
@@ -71,7 +71,7 @@ public class GameLogic {
         boolean sunk = false;
 
         if (hit) {
-            sunk = markHit(row, col, ship);
+            sunk = uiMarkingLogic.markHit(row, col, ship);
             checkGameEnd();
         } else {
             if (boardManager.computerShipButtons[row][col] != null) {
@@ -157,69 +157,6 @@ public class GameLogic {
         aiLogic.startComputerTurn();
     }
 
-    public boolean markHit(int row, int col, Ship ship) {
-        boolean sunk = false;
-        if (boardManager.computerShipButtons[row][col] != null) {
-            ship.takeHit();
-            sunk = ship.isSunk();
-            if (sunk) {
-                uiMarkingLogic.markSunkShip(ship);
-            } else {
-                uiMarkingLogic.markHitSymbol(boardManager.computerShipButtons[row][col]);
-            }
-        }
-        return sunk;
-    }
-
-    public boolean markHitPlayerBoard(int row, int col, Ship ship) {
-        if (isGameEnded || !isCellAvailableForShot(row, col) || boardManager.isComputerShotAt(row, col)) {
-            return false;
-        }
-
-        markComputerShot(row, col);
-
-        boolean sunk = false;
-        if (boardManager.playerShipButtons[row][col] != null) {
-            ship.takeHit();
-            sunk = ship.isSunk();
-            if (sunk) {
-                uiMarkingLogic.markSunkShipPlayerBoard(ship);
-                for (int[] coord : ship.getCoordinates()) {
-                    int r = coord[0];
-                    int c = coord[1];
-                    for (int dr = -1; dr <= 1; dr++) {
-                        for (int dc = -1; dc <= 1; dc++) {
-                            int newRow = r + dr;
-                            int newCol = c + dc;
-                            if (newRow >= 1 && newRow <= 10 && newCol >= 1 && newCol <= 10 && !boardManager.isComputerShotAt(newRow, newCol)) {
-                                markComputerShot(newRow, newCol);
-                            }
-                        }
-                    }
-                }
-                checkGameEnd();
-                if (isGameEnded) {
-                    aiLogic.stopTimer();
-                }
-            } else {
-                uiMarkingLogic.markHitSymbolPlayerBoard(boardManager.playerShipButtons[row][col]);
-            }
-        }
-        return sunk;
-    }
-
-    public void markMissPlayerBoard(int row, int col) {
-        if (isGameEnded || !isCellAvailableForShot(row, col) || boardManager.isComputerShotAt(row, col)) {
-            return;
-        }
-
-        markComputerShot(row, col);
-
-        if (boardManager.playerShipButtons[row][col] != null) {
-            uiMarkingLogic.markMissPlayerBoard(row, col);
-        }
-    }
-
     public void checkGameEnd() {
         if (isGameEnded) return;
 
@@ -273,17 +210,6 @@ public class GameLogic {
         });
     }
 
-    public void markComputerShot(int row, int col) {
-        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
-            boardManager.computerTargetedArea[row][col] = 1;
-        }
-    }
-
-    public void markPlayerShot(int row, int col) {
-        if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
-            boardManager.playerTargetedArea[row][col] = 1;
-        }
-    }
 
     public boolean isCellAvailableForShot(int row, int col) {
         ShipButton button = boardManager.playerShipButtons[row][col];

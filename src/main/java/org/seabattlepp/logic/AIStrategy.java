@@ -221,7 +221,9 @@ public class AIStrategy {
         if (isValidCell(row, col)) {
             targetedArea[row][col] = 1;
             if (gameLogic != null) {
-                gameLogic.markComputerShot(row, col);
+                if (row >= 1 && row <= 10 && col >= 1 && col <= 10) {
+                    gameLogic.boardManager.computerTargetedArea[row][col] = 1;
+                }
             }
         }
     }

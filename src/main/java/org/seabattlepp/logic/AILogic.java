@@ -137,9 +137,9 @@ public class AILogic {
         boolean sunk = false;
 
         if (hit) {
-            sunk = gameLogic.markHitPlayerBoard(row, col, ship);
+            sunk = gameLogic.uiMarkingLogic.markHitPlayerBoard(row, col, ship);
         } else {
-            gameLogic.markMissPlayerBoard(row, col);
+            gameLogic.uiMarkingLogic.markMissPlayerBoard(row, col);
         }
 
         aiStrategy.processShotResult(new int[]{row, col}, hit, sunk);
